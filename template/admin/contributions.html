@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>All Contributions</h2>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Contributions List</span>
+        <a href="#" class="btn btn-primary btn-sm">Add New Contribution</a>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Member</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contribution in contributions %}
+                <tr>
+                    <td>{{ contribution.id }}</td>
+                    <td>{{ contribution.member.name }}</td>
+                    <td>{{ contribution.amount }}</td>
+                    <td>{{ contribution.date.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-primary">View</a>
+                        <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>Loan Applications</h2>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5>All Loans</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Member</th>
+                            <th>Amount</th>
+                            <th>Purpose</th>
+                            <th>Interest Rate</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in loans %}
+                        <tr>
+                            <td>{{ loan.id }}</td>
+                            <td>{{ loan.member.name }}</td>
+                            <td>${{ loan.amount }}</td>
+                            <td>{{ loan.purpose }}</td>
+                            <td>{{ loan.interest_rate }}%</td>
+                            <td>{{ loan.issue_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ loan.due_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                {% if loan.status == 'Pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% elif loan.status == 'Approved' %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% elif loan.status == 'Rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% elif loan.status == 'Repaid' %}
+                                    <span class="badge bg-info">Repaid</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if loan.status == 'Pending' %}
+                                <div class="btn-group">
+                                    <form method="POST" action="{{ url_for('update_loan_status', loan_id=loan.id) }}" class="me-1">
+                                        <input type="hidden" name="status" value="Approved">
+                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('update_loan_status', loan_id=loan.id) }}">
+                                        <input type="hidden" name="status" value="Rejected">
+                                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                    </form>
+                                </div>
+                                {% elif loan.status == 'Approved' %}
+                                <form method="POST" action="{{ url_for('update_loan_status', loan_id=loan.id) }}">
+                                    <input type="hidden" name="status" value="Repaid">
+                                    <button type="submit" class="btn btn-sm btn-info">Mark as Repaid</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center">No loans found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4><i class="fas fa-hand-holding-usd me-2"></i>Apply for Loan</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="member_id" class="form-label">Member</label>
+                            <select class="form-select" id="member_id" name="member_id" required>
+                                <option value="">Select a member</option>
+                                {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select the member applying for this loan</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="amount" name="amount" min="100" step="100" required>
+                            </div>
+                            <div class="form-text">Enter the loan amount needed</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="purpose" class="form-label">Purpose</label>
+                            <textarea class="form-control" id="purpose" name="purpose" rows="3" required></textarea>
+                            <div class="form-text">Explain how the loan will be used</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="due_date" class="form-label">Due Date</label>
+                            <input type="date" class="form-control" id="due_date" name="due_date" required>
+                            <div class="form-text">When will the loan be repaid?</div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Loan Terms</h6>
+                                <ul class="mb-0">
+                                    <li>Interest Rate: 10% per annum</li>
+                                    <li>Processing Time: 2-3 business days</li>
+                                    <li>Early repayment is allowed without penalty</li>
+                                    <li>Late payments incur a 2% additional fee</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Application
+                            </button>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <i class="fas fa-calculator me-2"></i>Loan Calculator
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="calc-amount" class="form-label">Loan Amount ($)</label>
+                        <input type="number" class="form-control" id="calc-amount" value="1000">
+                    </div>
+                    <div class="mb-3">
+                        <label for="calc-months" class="form-label">Term (months)</label>
+                        <input type="number" class="form-control" id="calc-months" value="6">
+                    </div>
+                    <div class="mb-3">
+                        <label for="calc-rate" class="form-label">Interest Rate (%)</label>
+                        <input type="number" class="form-control" id="calc-rate" value="10" readonly>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100" id="calculate-btn">Calculate</button>
+                    
+                    <div class="mt-3 p-3 border rounded bg-light" id="result" style="display: none;">
+                        <div class="row mb-2">
+                            <div class="col-7">Monthly Payment:</div>
+                            <div class="col-5 text-end" id="monthly-payment">$0</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-7">Total Interest:</div>
+                            <div class="col-5 text-end" id="total-interest">$0</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-7">Total Payment:</div>
+                            <div class="col-5 text-end" id="total-payment">$0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <i class="fas fa-lightbulb me-2"></i>Loan Tips
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Only borrow what you need</li>
+                        <li>Have a clear repayment plan</li>
+                        <li>Consider your current financial obligations</li>
+                        <li>Keep documentation of all transactions</li>
+                        <li>Communicate early if you anticipate repayment issues</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultDiv = document.getElementById('result');
+        const monthlyPayment = document.getElementById('monthly-payment');
+        const totalInterest = document.getElementById('total-interest');
+        const totalPayment = document.getElementById('total-payment');
+        
+        calculateBtn.addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('calc-amount').value);
+            const months = parseInt(document.getElementById('calc-months').value);
+            const rate = parseFloat(document.getElementById('calc-rate').value) / 100 / 12;
+            
+            if (amount > 0 && months > 0) {
+                const x = Math.pow(1 + rate, months);
+                const monthly = (amount * x * rate) / (x - 1);
+                
+                const monthlyPaymentValue = monthly.toFixed(2);
+                const totalPaymentValue = (monthly * months).toFixed(2);
+                const totalInterestValue = ((monthly * months) - amount).toFixed(2);
+                
+                monthlyPayment.textContent = '$' + monthlyPaymentValue;
+                totalInterest.textContent = '$' + totalInterestValue;
+                totalPayment.textContent = '$' + totalPaymentValue;
+                
+                resultDiv.style.display = 'block';
+                
+                // Update the main form amount if user wants
+                document.getElementById('calc-amount').addEventListener('change', function() {
+                    document.getElementById('amount').value = this.value;
+                });
+            }
+        });
+        
+        // Set minimum date for due date to tomorrow
+        const dueDateInput = document.getElementById('due_date');
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dueDateInput.min = tomorrow.toISOString().split('T')[0];
+    });
+</script>
+{% endblock %}

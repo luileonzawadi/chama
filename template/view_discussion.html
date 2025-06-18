@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ discussion.title }}</h2>
+        <a href="{{ url_for('discussions') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Discussions
+        </a>
+    </div>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-primary me-2">Topic</span>
+                    <span class="text-muted">Posted by {{ discussion.user.username }} on {{ discussion.date.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <p>{{ discussion.content }}</p>
+        </div>
+    </div>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <i class="fas fa-comments me-2"></i>Discussion Chat
+        </div>
+        <div class="card-body">
+            <div id="chat-messages" class="mb-4" style="max-height: 400px; overflow-y: auto;">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="d-flex mb-3 {% if message.user_id == current_user.id %}justify-content-end{% endif %}">
+                        <div class="card {% if message.user_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %}" style="max-width: 80%;">
+                            <div class="card-body py-2 px-3">
+                                <p class="mb-1">{{ message.content }}</p>
+                                <small class="{% if message.user_id == current_user.id %}text-white-50{% else %}text-muted{% endif %}">
+                                    {{ message.user.username }} - {{ message.timestamp.strftime('%H:%M') }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <p>No messages yet. Be the first to comment!</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <form method="POST" action="{{ url_for('add_message', discussion_id=discussion.id) }}">
+                <div class="input-group">
+                    <input type="text" name="content" class="form-control" placeholder="Type your message..." required>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i> Send
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-scroll to bottom of chat on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        var chatMessages = document.getElementById('chat-messages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+</script>
+{% endblock %}

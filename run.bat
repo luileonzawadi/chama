@@ -1,0 +1,3 @@
+@echo off
+echo Starting Chama Management System...
+python app.py

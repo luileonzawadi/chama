@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Members</h2>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('add_member') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Member
+        </a>
+    </div>
+</div>
+
+<!-- Members List -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Your Members</h5>
+    </div>
+    <div class="card-body">
+        {% if members %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Join Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr>
+                        <td>{{ member.name }}</td>
+                        <td>{{ member.phone }}</td>
+                        <td>{{ member.email }}</td>
+                        <td>{{ member.join_date.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <span class="badge bg-success">{{ member.status }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No members found. Add your first member using the button above.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Contributions -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Contributions</h5>
+        <a href="{{ url_for('contributions') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body">
+        {% if contributions %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Member</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contribution in contributions %}
+                    <tr>
+                        <td>{{ contribution.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ contribution.member_id }}</td>
+                        <td>${{ contribution.amount }}</td>
+                        <td>{{ contribution.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No recent contributions. <a href="{{ url_for('contributions') }}">Add a contribution</a>.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

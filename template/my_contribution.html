@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My Contributions</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in contributions %}
+        <tr>
+            <td>{{ c.amount }}</td>
+            <td>{{ c.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ c.description or '' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('contribute') }}" class="btn btn-primary">Make a Contribution</a>
+{% endblock %}

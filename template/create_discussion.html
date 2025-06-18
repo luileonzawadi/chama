@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4><i class="fas fa-comment-dots me-2"></i>Start New Discussion</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required 
+                                   value="{{ request.args.get('topic', '') | capitalize ~ ' Discussion' if request.args.get('topic') else '' }}">
+                            <div class="form-text">Choose a clear, descriptive title for your discussion</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Content</label>
+                            <textarea class="form-control" id="content" name="content" rows="6" required></textarea>
+                            <div class="form-text">Provide details to start the conversation</div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Post Discussion
+                            </button>
+                            <a href="{{ url_for('discussions') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <i class="fas fa-lightbulb me-2"></i>Tips for Good Discussions
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Be clear and specific in your title</li>
+                        <li>Provide enough details in your content</li>
+                        <li>Ask open-ended questions to encourage responses</li>
+                        <li>Be respectful of others' opinions</li>
+                        <li>Stay on topic and follow up on responses</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <i class="fas fa-tags me-2"></i>Suggested Topics
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-primary topic-btn" data-topic="Investment opportunities for our funds">
+                            <i class="fas fa-chart-line me-2"></i>Investment Opportunities
+                        </button>
+                        <button type="button" class="btn btn-outline-success topic-btn" data-topic="Planning our next monthly meeting">
+                            <i class="fas fa-calendar-alt me-2"></i>Meeting Planning
+                        </button>
+                        <button type="button" class="btn btn-outline-warning topic-btn" data-topic="Suggestions for improving our loan policies">
+                            <i class="fas fa-hand-holding-usd me-2"></i>Loan Policies
+                        </button>
+                        <button type="button" class="btn btn-outline-info topic-btn" data-topic="Ideas for growing our membership">
+                            <i class="fas fa-users me-2"></i>Membership Growth
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const topicButtons = document.querySelectorAll('.topic-btn');
+        const contentField = document.getElementById('content');
+        
+        topicButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                contentField.value = this.getAttribute('data-topic');
+                contentField.focus();
+            });
+        });
+    });
+</script>
+{% endblock %}

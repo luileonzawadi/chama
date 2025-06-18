@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Welcome, {{ current_user.username }}</h1>
+            <p class="lead text-muted">Manage your chama activities and track your financial progress</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('main.apply_loan') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-hand-holding-usd me-2"></i>Apply for Loan
+            </a>
+        </div>
+    </div>
+    
+    <!-- Dashboard Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">My Members</h5>
+                            <h2 class="card-text">{{ members|length }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-50"></i>
+                    </div>
+                    <a href="{{ url_for('main.add_member') }}" class="btn btn-light btn-sm mt-2">Add Member</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Active Members</h5>
+                            <h2 class="card-text">{{ active_members|length }}</h2>
+                        </div>
+                        <i class="fas fa-user-check fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Contributions</h5>
+                            <h2 class="card-text">{{ contributions|length }}</h2>
+                        </div>
+                        <i class="fas fa-money-bill-wave fa-2x opacity-50"></i>
+                    </div>
+                    <a href="{{ url_for('main.contributions') }}" class="btn btn-light btn-sm mt-2">View All</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Loans</h5>
+                            <h2 class="card-text">{{ loans|length }}</h2>
+                        </div>
+                        <i class="fas fa-landmark fa-2x opacity-50"></i>
+                    </div>
+                    <a href="{{ url_for('main.apply_loan') }}" class="btn btn-light btn-sm mt-2">Apply for Loan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-8">
+            <!-- Recent Contributions -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-money-bill-wave me-2"></i>Recent Contributions</span>
+                    <a href="{{ url_for('main.contributions') }}" class="btn btn-primary btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contribution in contributions %}
+                                <tr>
+                                    <td>{{ contribution.member.name }}</td>
+                                    <td>${{ contribution.amount }}</td>
+                                    <td>{{ contribution.date.strftime('%Y-%m-%d') }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No contributions found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loan Applications -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-hand-holding-usd me-2"></i>Loan Applications</span>
+                    <a href="{{ url_for('main.apply_loan') }}" class="btn btn-primary btn-sm">Apply for Loan</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Amount</th>
+                                    <th>Purpose</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for loan in loans %}
+                                <tr>
+                                    <td>{{ loan.member.name }}</td>
+                                    <td>${{ loan.amount }}</td>
+                                    <td>{{ loan.purpose }}</td>
+                                    <td>{{ loan.due_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if loan.status == 'Pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif loan.status == 'Approved' %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% elif loan.status == 'Rejected' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% elif loan.status == 'Repaid' %}
+                                            <span class="badge bg-info">Repaid</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No loans found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Discussions -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-comments me-2"></i>Recent Discussions</span>
+                    <div>
+                        <a href="{{ url_for('main.discussions') }}" class="btn btn-outline-primary btn-sm me-2">View All</a>
+                        <a href="{{ url_for('main.create_discussion') }}" class="btn btn-primary btn-sm">Start Discussion</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% for discussion in discussions %}
+                    <div class="mb-3">
+                        <h5><a href="{{ url_for('main.view_discussion', discussion_id=discussion.id) }}" class="text-decoration-none">{{ discussion.title }}</a></h5>
+                        <p class="text-muted">Posted by {{ discussion.user.username }} on {{ discussion.date.strftime('%Y-%m-%d') }}</p>
+                        <p>{{ discussion.content|truncate(100) }}</p>
+                        <a href="{{ url_for('main.view_discussion', discussion_id=discussion.id) }}" class="btn btn-sm btn-outline-primary">Join Discussion</a>
+                    </div>
+                    {% if not loop.last %}<hr>{% endif %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <p>No discussions found</p>
+                        <a href="{{ url_for('main.create_discussion') }}" class="btn btn-primary">Start the first discussion</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-md-4">
+            <!-- User Profile Card -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white">
+                    <i class="fas fa-user-circle me-2"></i>My Profile
+                </div>
+                <div class="card-body text-center">
+                    <div class="avatar mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <h5>{{ current_user.username }}</h5>
+                    <p class="text-muted">Member since {{ current_user.id }}</p>
+                    <a href="#" class="btn btn-sm btn-outline-primary">Edit Profile</a>
+                </div>
+            </div>
+            
+            <!-- Notifications -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-bell me-2"></i>Notifications</span>
+                    <a href="{{ url_for('main.notifications') }}" class="btn btn-primary btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    {% for notification in notifications %}
+                    <div class="alert {% if notification.is_read %}alert-secondary{% else %}alert-primary{% endif %} mb-2">
+                        <h6>{{ notification.title }}</h6>
+                        <p class="mb-1">{{ notification.message|truncate(50) }}</p>
+                        <small class="text-muted">{{ notification.date.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                        <p>No notifications found</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- My Members -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-users me-2"></i>My Members</span>
+                    <a href="{{ url_for('main.add_member') }}" class="btn btn-primary btn-sm">Add Member</a>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for member in members %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ member.name }}
+                            <span class="badge bg-{% if member.status == 'Active' %}success{% else %}secondary{% endif %} rounded-pill">{{ member.status }}</span>
+                        </li>
+                        {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-user-plus fa-2x text-muted mb-2"></i>
+                            <p>No members found</p>
+                            <a href="{{ url_for('main.add_member') }}" class="btn btn-sm btn-primary">Add your first member</a>
+                        </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.add_member') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Add Member
+                        </a>
+                        <a href="{{ url_for('main.apply_loan') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-hand-holding-usd me-2"></i>Apply for Loan
+                        </a>
+                        <a href="{{ url_for('main.create_discussion') }}" class="btn btn-outline-info">
+                            <i class="fas fa-comment-dots me-2"></i>Start Discussion
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,3 @@
+@echo off
+echo Starting Enhanced Chama Management System...
+python fixed_routes.py
