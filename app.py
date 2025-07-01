@@ -50,6 +50,18 @@ class Contribution(db.Model):
     def __repr__(self):
         return f'<Contribution {self.amount}>'
 
+# Loan model
+class Loan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    purpose = db.Column(db.String(200))
+    status = db.Column(db.String(20), default='Pending')
+    date_applied = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Loan {self.amount} - {self.status}>'
+
 # User loader for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
@@ -174,7 +186,7 @@ def contributions():
 @login_required
 def my_contributions():
     contributions = Contribution.query.filter_by(user_id=current_user.id).order_by(Contribution.date.desc()).all()
-    return render_template('my_contributions.html', contributions=contributions)
+    return render_template('my_contribution.html', contributions=contributions)
 
 @app.route('/contribute', methods=['GET', 'POST'])
 @login_required
@@ -193,6 +205,34 @@ def contribute():
         return redirect(url_for('my_contributions'))
     return render_template('contribute.html', members=members)
 
+# Loan application route
+@app.route('/apply-loan', methods=['GET', 'POST'])
+@login_required
+def apply_loan():
+    if request.method == 'POST':
+        amount = request.form.get('amount')
+        purpose = request.form.get('purpose')
+        if not amount or not purpose:
+            flash('Amount and purpose are required', 'danger')
+            return redirect(url_for('apply_loan'))
+        loan = Loan(
+            amount=Decimal(amount),
+            purpose=purpose,
+            user_id=current_user.id
+        )
+        db.session.add(loan)
+        db.session.commit()
+        flash('Loan application submitted successfully!', 'success')
+        return redirect(url_for('my_loans'))
+    return render_template('apply_loan.html')
+
+# User's loan applications
+@app.route('/my-loans')
+@login_required
+def my_loans():
+    loans = Loan.query.filter_by(user_id=current_user.id).order_by(Loan.date_applied.desc()).all()
+    return render_template('my_loans.html', loans=loans)
+
 @app.route('/admin')
 @login_required
 @admin_required
@@ -200,11 +240,12 @@ def admin_dashboard():
     members_count = Member.query.count()
     users_count = User.query.count()
     contributions_count = Contribution.query.count()
+    loans_count = Loan.query.count()
     context = {
         'members_count': members_count,
         'users_count': users_count,
         'contributions_count': contributions_count,
-        'loans_count': 0,
+        'loans_count': loans_count,
         'admin_users_url': url_for('admin_users'),
         'admin_members_url': url_for('admin_members'),
         'add_member_url': url_for('add_member'),
