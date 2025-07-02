@@ -235,33 +235,66 @@ def index():
     if current_user.is_admin:
         return redirect(url_for('admin_dashboard'))
     
-    members = Member.query.filter_by(user_id=current_user.id).all()
-    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.date.desc()).limit(5).all()
+    # Get all active members
+    members = Member.query.filter_by(status='Active').all()
+    
+    # Get all contributions
+    contributions = Contribution.query.join(Member)\
+        .filter(Member.status == 'Active')\
+        .order_by(Contribution.date.desc())\
+        .limit(10).all()
+    
+    # Get user's own contributions for personal stats
+    user_contributions = Contribution.query.join(Member)\
+        .filter(Member.user_id == current_user.id)\
+        .order_by(Contribution.date.desc())\
+        .limit(5).all()
+    
+    # Calculate totals
+    total_contributions = db.session.query(
+        db.func.sum(Contribution.amount)
+    ).scalar() or 0.0
+    
+    user_contributions_total = db.session.query(
+        db.func.sum(Contribution.amount)
+    ).join(Member)\
+     .filter(Member.user_id == current_user.id)\
+     .scalar() or 0.0
+    
+    notifications = Notification.query.filter_by(user_id=current_user.id)\
+        .order_by(Notification.date.desc())\
+        .limit(5).all()
+    
     discussions = Discussion.query.order_by(Discussion.date.desc()).limit(5).all()
-    contributions = Contribution.query.join(Member).filter(Member.user_id == current_user.id).order_by(Contribution.date.desc()).limit(5).all()
     loans = Loan.query.join(Member).filter(Member.user_id == current_user.id).all()
     
     return render_template('dashboard.html',
-                         members=members,
-                         notifications=notifications,
-                         discussions=discussions,
-                         contributions=contributions,
-                         loans=loans)
+        members=members,
+        contributions=contributions,
+        user_contributions=user_contributions,
+        total_contributions=total_contributions,
+        user_contributions_total=user_contributions_total,
+        notifications=notifications,
+        discussions=discussions,
+        loans=loans
+    )
 
-# Member Management Routes
+# Member Routes
 @app.route('/members')
 @login_required
 def member_list():
-    members = Member.query.filter_by(user_id=current_user.id).all()
-    return render_template('members/list.html', members=members)
+    members = Member.query.filter_by(status='Active').all()
+    return render_template('members/list_public.html', members=members)
 
 @app.route('/members/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def add_member():
     if request.method == 'POST':
         name = request.form.get('name')
         phone = request.form.get('phone')
         email = request.form.get('email')
+        user_id = request.form.get('user_id')
         
         if Member.query.filter_by(phone=phone).first():
             flash('Phone number already registered', 'danger')
@@ -270,83 +303,114 @@ def add_member():
                 name=name,
                 phone=phone,
                 email=email,
-                user_id=current_user.id
+                user_id=user_id,
+                status='Active'
             )
             db.session.add(member)
             db.session.commit()
             flash('Member added successfully', 'success')
-            return redirect(url_for('member_list'))
-    return render_template('members/add.html')
+            return redirect(url_for('admin_members'))
+    
+    users = User.query.filter_by(is_admin=False).all()
+    return render_template('members/add.html', users=users)
 
 @app.route('/members/<int:member_id>')
 @login_required
 def view_member(member_id):
     member = Member.query.get_or_404(member_id)
-    if member.user_id != current_user.id and not current_user.is_admin:
-        abort(403)
     contributions = Contribution.query.filter_by(member_id=member_id).all()
     loans = Loan.query.filter_by(member_id=member_id).all()
-    return render_template('members/view.html', member=member, contributions=contributions, loans=loans)
+    return render_template('members/view_public.html', 
+                         member=member, 
+                         contributions=contributions, 
+                         loans=loans)
 
 # Contribution Routes
 @app.route('/contributions')
 @login_required
 def contributions():
-    contributions = Contribution.query.join(Member).filter(Member.user_id == current_user.id).order_by(Contribution.date.desc()).all()
-    return render_template('contributions/list.html', contributions=contributions)
+    contributions = Contribution.query.join(Member)\
+        .filter(Member.status == 'Active')\
+        .order_by(Contribution.date.desc()).all()
+    return render_template('contributions/list_public.html', contributions=contributions)
 
 @app.route('/contributions/add', methods=['GET', 'POST'])
 @login_required
 def add_contribution():
-    members = Member.query.filter_by(user_id=current_user.id).all()
+    # Members can only contribute to their own account
+    member = Member.query.filter_by(user_id=current_user.id).first()
+    if not member:
+        flash('No member profile found for your account', 'danger')
+        return redirect(url_for('index'))
+    
     if request.method == 'POST':
-        member_id = request.form.get('member_id')
         amount = request.form.get('amount')
         
-        if not member_id or not amount:
-            flash('Member and amount are required', 'danger')
-        else:
-            contribution = Contribution(
-                amount=float(amount),
-                member_id=member_id
-            )
-            db.session.add(contribution)
-            db.session.commit()
-            flash('Contribution recorded', 'success')
-            return redirect(url_for('contributions'))
-    return render_template('contributions/add.html', members=members)
+        try:
+            amount = float(amount)
+            if amount <= 0:
+                raise ValueError
+        except ValueError:
+            flash('Invalid amount entered', 'danger')
+            return redirect(url_for('add_contribution'))
+            
+        contribution = Contribution(
+            amount=amount,
+            member_id=member.id,
+            date=datetime.utcnow()
+        )
+        db.session.add(contribution)
+        db.session.commit()
+        
+        flash('Contribution recorded successfully!', 'success')
+        return redirect(url_for('index'))
+    
+    return render_template('contributions/add.html')
 
 # Loan Routes
 @app.route('/loans')
 @login_required
 def loans():
-    loans = Loan.query.join(Member).filter(Member.user_id == current_user.id).all()
+    loans = Loan.query.join(Member)\
+        .filter(Member.user_id == current_user.id)\
+        .all()
     return render_template('loans/list.html', loans=loans)
 
 @app.route('/loans/apply', methods=['GET', 'POST'])
 @login_required
 def apply_loan():
-    members = Member.query.filter_by(user_id=current_user.id).all()
+    member = Member.query.filter_by(user_id=current_user.id).first()
+    if not member:
+        flash('No member profile found for your account', 'danger')
+        return redirect(url_for('index'))
+    
     if request.method == 'POST':
-        member_id = request.form.get('member_id')
         amount = request.form.get('amount')
         purpose = request.form.get('purpose')
         due_date = datetime.strptime(request.form.get('due_date'), '%Y-%m-%d')
         
-        if not member_id or not amount or not purpose or not due_date:
-            flash('All fields are required', 'danger')
-        else:
-            loan = Loan(
-                amount=float(amount),
-                purpose=purpose,
-                due_date=due_date,
-                member_id=member_id
-            )
-            db.session.add(loan)
-            db.session.commit()
-            flash('Loan application submitted', 'success')
-            return redirect(url_for('loans'))
-    return render_template('loans/apply.html', members=members)
+        try:
+            amount = float(amount)
+            if amount <= 0:
+                raise ValueError
+        except ValueError:
+            flash('Invalid amount entered', 'danger')
+            return redirect(url_for('apply_loan'))
+            
+        loan = Loan(
+            amount=amount,
+            purpose=purpose,
+            due_date=due_date,
+            member_id=member.id,
+            status='Pending'
+        )
+        db.session.add(loan)
+        db.session.commit()
+        
+        flash('Loan application submitted successfully!', 'success')
+        return redirect(url_for('loans'))
+    
+    return render_template('loans/apply.html')
 
 # Discussion Routes
 @app.route('/discussions')

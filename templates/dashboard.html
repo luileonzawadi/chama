@@ -8,7 +8,7 @@
             <p class="lead text-muted">Manage your chama activities and track your financial progress</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ url_for('main.apply_loan') }}" class="btn btn-primary btn-lg">
+            <a href="{{ url_for('apply_loan') }}" class="btn btn-primary btn-lg">
                 <i class="fas fa-hand-holding-usd me-2"></i>Apply for Loan
             </a>
         </div>
@@ -27,7 +27,7 @@
                         <i class="fas fa-users fa-2x opacity-50"></i>
                     </div>
                     {% if current_user.is_admin %}
-                        <a href="{{ url_for('main.add_member') }}" class="btn btn-light btn-sm mt-2">Add Member</a>
+                        <a href="{{ url_for('add_member') }}" class="btn btn-light btn-sm mt-2">Add Member</a>
                     {% endif %}
                 </div>
             </div>
@@ -55,7 +55,7 @@
                         </div>
                         <i class="fas fa-money-bill-wave fa-2x opacity-50"></i>
                     </div>
-                    <a href="{{ url_for('main.contributions') }}" class="btn btn-light btn-sm mt-2">View All</a>
+                    <a href="{{ url_for('contributions') }}" class="btn btn-light btn-sm mt-2">View All</a>
                 </div>
             </div>
         </div>
@@ -69,7 +69,7 @@
                         </div>
                         <i class="fas fa-landmark fa-2x opacity-50"></i>
                     </div>
-                    <a href="{{ url_for('main.apply_loan') }}" class="btn btn-light btn-sm mt-2">Apply for Loan</a>
+                    <a href="{{ url_for('apply_loan') }}" class="btn btn-light btn-sm mt-2">Apply for Loan</a>
                 </div>
             </div>
         </div>
@@ -82,7 +82,7 @@
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-money-bill-wave me-2"></i>Recent Contributions</span>
-                    <a href="{{ url_for('main.contributions') }}" class="btn btn-primary btn-sm">View All</a>
+                    <a href="{{ url_for('contributions') }}" class="btn btn-primary btn-sm">View All</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -116,7 +116,7 @@
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-hand-holding-usd me-2"></i>Loan Applications</span>
-                    <a href="{{ url_for('main.apply_loan') }}" class="btn btn-primary btn-sm">Apply for Loan</a>
+                    <a href="{{ url_for('apply_loan') }}" class="btn btn-primary btn-sm">Apply for Loan</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -254,7 +254,7 @@
                             <i class="fas fa-user-plus fa-2x text-muted mb-2"></i>
                             <p>No members found</p>
                             {% if current_user.is_admin %}
-                                <a href="{{ url_for('main.add_member') }}" class="btn btn-sm btn-primary">Add your first member</a>
+                                <a href="{{ url_for('add_member') }}" class="btn btn-sm btn-primary">Add your first member</a>
                             {% endif %}
                         </div>
                         {% endfor %}
@@ -270,7 +270,7 @@
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         {% if current_user.is_admin %}
-                            <a href="{{ url_for('main.add_member') }}" class="btn btn-outline-primary">
+                            <a href="{{ url_for('add_member') }}" class="btn btn-outline-primary">
                                 <i class="fas fa-user-plus me-2"></i>Add Member
                             </a>
                         {% endif %}
