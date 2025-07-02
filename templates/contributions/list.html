@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Contributions</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Member</th>
+            <th>Amount</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for contribution in contributions %}
+        <tr>
+            <td>{{ contribution.member.name }}</td>
+            <td>{{ contribution.amount }}</td>
+            <td>{{ contribution.date.strftime('%Y-%m-%d') if contribution.date else '' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
