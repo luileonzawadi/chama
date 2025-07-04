@@ -4,25 +4,66 @@
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card">
-            <div class="card-header">Add Member</div>
+            <div class="card-header">
+                <h4>Add New Member</h4>
+                <small class="text-muted">This will create both a member profile and user account</small>
+            </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('add_member') }}">
                     <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
+                        <label for="name" class="form-label">Full Name</label>
                         <input type="text" class="form-control" id="name" name="name" required>
                     </div>
                     <div class="mb-3">
-                        <label for="phone" class="form-label">Phone</label>
+                        <label for="phone" class="form-label">Phone Number</label>
                         <input type="text" class="form-control" id="phone" name="phone" required>
                     </div>
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
+                        <label for="email" class="form-label">Email Address</label>
                         <input type="email" class="form-control" id="email" name="email">
                     </div>
-                    <button type="submit" class="btn btn-primary">Add Member</button>
+                    <hr>
+                    <h6 class="text-primary mb-3">Login Credentials</h6>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <div class="form-text">Member will use this to login</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="temp_password" class="form-label">Temporary Password</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="temp_password" name="temp_password" required>
+                            <button type="button" class="btn btn-outline-secondary" onclick="generatePassword()">
+                                Generate
+                            </button>
+                        </div>
+                        <div class="form-text">Member can change this after first login</div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Add Member & Create Account</button>
+                        <a href="{{ url_for('admin_members') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function generatePassword() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('temp_password').value = password;
+}
+
+document.getElementById('name').addEventListener('input', function() {
+    const name = this.value.toLowerCase().replace(/\s+/g, '');
+    if (name && !document.getElementById('username').value) {
+        document.getElementById('username').value = name;
+    }
+});
+</script>
 {% endblock %}

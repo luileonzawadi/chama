@@ -294,25 +294,46 @@ def add_member():
         name = request.form.get('name')
         phone = request.form.get('phone')
         email = request.form.get('email')
-        user_id = request.form.get('user_id')
+        username = request.form.get('username')
+        temp_password = request.form.get('temp_password')
         
         if Member.query.filter_by(phone=phone).first():
             flash('Phone number already registered', 'danger')
+        elif User.query.filter_by(username=username).first():
+            flash('Username already exists', 'danger')
         else:
+            # Create user account first
+            new_user = User(
+                username=username,
+                password=generate_password_hash(temp_password),
+                is_admin=False
+            )
+            db.session.add(new_user)
+            db.session.flush()  # Get user ID
+            
+            # Create member profile
             member = Member(
                 name=name,
                 phone=phone,
                 email=email,
-                user_id=user_id,
+                user_id=new_user.id,
                 status='Active'
             )
             db.session.add(member)
             db.session.commit()
-            flash('Member added successfully', 'success')
+            
+            flash(f'Member added successfully. Username: {username}, Temporary Password: {temp_password}', 'success')
             return redirect(url_for('admin_members'))
     
-    users = User.query.filter_by(is_admin=False).all()
-    return render_template('members/add.html', users=users)
+    return render_template('members/add.html')
+
+import secrets
+import string
+
+def generate_temp_password(length=8):
+    """Generate a temporary password"""
+    characters = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(characters) for _ in range(length))
 
 @app.route('/members/<int:member_id>')
 @login_required
@@ -448,9 +469,9 @@ def view_discussion(discussion_id):
 @login_required
 def add_message(discussion_id):
     content = request.form.get('content')
-    if content:
+    if content and content.strip():
         message = Message(
-            content=content,
+            content=content.strip(),
             user_id=current_user.id,
             discussion_id=discussion_id
         )
@@ -458,6 +479,86 @@ def add_message(discussion_id):
         db.session.commit()
         flash('Message sent', 'success')
     return redirect(url_for('view_discussion', discussion_id=discussion_id))
+
+@app.route('/discussions/<int:discussion_id>/messages')
+@login_required
+def get_messages(discussion_id):
+    """API endpoint to fetch messages for AJAX updates"""
+    messages = Message.query.filter_by(discussion_id=discussion_id)\
+        .order_by(Message.timestamp).all()
+    
+    messages_data = []
+    for message in messages:
+        messages_data.append({
+            'id': message.id,
+            'content': message.content,
+            'username': message.user.username,
+            'timestamp': message.timestamp.strftime('%I:%M %p'),
+            'is_current_user': message.user_id == current_user.id
+        })
+    
+    return {'messages': messages_data}
+
+# User Account Routes
+@app.route('/account/profile')
+@login_required
+def account_profile():
+    member = Member.query.filter_by(user_id=current_user.id).first()
+    return render_template('account/profile.html', user=current_user, member=member)
+
+@app.route('/account/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        
+        # Check if username is taken by another user
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user and existing_user.id != current_user.id:
+            flash('Username already taken', 'danger')
+            return render_template('account/edit.html', user=current_user)
+        
+        current_user.username = username
+        db.session.commit()
+        flash('Profile updated successfully', 'success')
+        return redirect(url_for('account_profile'))
+    
+    return render_template('account/edit.html', user=current_user)
+
+@app.route('/account/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        # Verify current password
+        if not check_password_hash(current_user.password, current_password):
+            flash('Current password is incorrect', 'danger')
+            return render_template('account/change_password.html')
+        
+        # Validate new password
+        if new_password != confirm_password:
+            flash('New passwords do not match', 'danger')
+            return render_template('account/change_password.html')
+        
+        if len(new_password) < 6:
+            flash('Password must be at least 6 characters long', 'danger')
+            return render_template('account/change_password.html')
+        
+        # Update password
+        current_user.password = generate_password_hash(new_password)
+        db.session.commit()
+        flash('Password changed successfully', 'success')
+        return redirect(url_for('account_profile'))
+    
+    return render_template('account/change_password.html')
+
+@app.route('/account/settings')
+@login_required
+def account_settings():
+    return render_template('account/settings.html', user=current_user)
 
 # Notification Routes
 @app.route('/notifications')
@@ -480,7 +581,114 @@ def admin_dashboard():
         'contributions': Contribution.query.count(),
         'loans': Loan.query.count()
     }
-    return render_template('admin/dashboard.html', stats=stats)
+    
+    # AI Default Risk Analysis
+    risk_analysis = calculate_default_risk_analysis()
+    
+    return render_template('admin/dashboard.html', stats=stats, risk_analysis=risk_analysis)
+
+def calculate_default_risk_analysis():
+    """AI-based default risk prediction for members"""
+    members = Member.query.all()
+    risk_predictions = []
+    
+    for member in members:
+        # Get member's financial data
+        contributions = Contribution.query.filter_by(member_id=member.id).all()
+        loans = Loan.query.filter_by(member_id=member.id).all()
+        
+        # Calculate risk factors
+        total_contributions = sum(c.amount for c in contributions)
+        total_loans = sum(l.amount for l in loans)
+        active_loans = [l for l in loans if l.status in ['Approved', 'Pending']]
+        overdue_loans = [l for l in loans if l.status == 'Overdue']
+        
+        # AI Risk Scoring Algorithm
+        risk_score = 0
+        risk_factors = []
+        
+        # Factor 1: Loan to Contribution Ratio
+        if total_contributions > 0:
+            loan_ratio = total_loans / total_contributions
+            if loan_ratio > 2:
+                risk_score += 40
+                risk_factors.append('High loan-to-contribution ratio')
+            elif loan_ratio > 1:
+                risk_score += 20
+                risk_factors.append('Moderate loan-to-contribution ratio')
+        else:
+            risk_score += 50
+            risk_factors.append('No contributions made')
+        
+        # Factor 2: Active Loans Count
+        if len(active_loans) > 2:
+            risk_score += 30
+            risk_factors.append('Multiple active loans')
+        elif len(active_loans) > 1:
+            risk_score += 15
+        
+        # Factor 3: Payment History
+        if overdue_loans:
+            risk_score += 35
+            risk_factors.append('Previous overdue payments')
+        
+        # Factor 4: Contribution Consistency
+        if len(contributions) < 3:
+            risk_score += 25
+            risk_factors.append('Irregular contribution pattern')
+        
+        # Factor 5: Member Activity
+        if not contributions and not loans:
+            risk_score += 60
+            risk_factors.append('Inactive member')
+        
+        # Determine risk level
+        if risk_score >= 70:
+            risk_level = 'High'
+            risk_color = 'danger'
+        elif risk_score >= 40:
+            risk_level = 'Medium'
+            risk_color = 'warning'
+        else:
+            risk_level = 'Low'
+            risk_color = 'success'
+        
+        risk_predictions.append({
+            'member': member,
+            'risk_score': min(risk_score, 100),
+            'risk_level': risk_level,
+            'risk_color': risk_color,
+            'risk_factors': risk_factors,
+            'total_contributions': total_contributions,
+            'total_loans': total_loans,
+            'active_loans_count': len(active_loans)
+        })
+    
+    # Sort by risk score (highest first)
+    risk_predictions.sort(key=lambda x: x['risk_score'], reverse=True)
+    
+    # Calculate summary statistics
+    high_risk_count = len([r for r in risk_predictions if r['risk_level'] == 'High'])
+    medium_risk_count = len([r for r in risk_predictions if r['risk_level'] == 'Medium'])
+    low_risk_count = len([r for r in risk_predictions if r['risk_level'] == 'Low'])
+    
+    return {
+        'predictions': risk_predictions,
+        'summary': {
+            'high_risk': high_risk_count,
+            'medium_risk': medium_risk_count,
+            'low_risk': low_risk_count,
+            'total_analyzed': len(risk_predictions)
+        }
+    }
+
+@app.route('/admin/risk-analysis')
+@login_required
+@admin_required
+def admin_risk_analysis():
+    """Detailed risk analysis page"""
+    risk_analysis = calculate_default_risk_analysis()
+    return render_template('admin/risk_analysis.html', risk_analysis=risk_analysis)
 
 @app.route('/admin/members')
 @login_required
@@ -512,6 +720,38 @@ def approve_loan(loan_id):
     db.session.commit()
     flash('Loan approved', 'success')
     return redirect(url_for('admin_loans'))
+
+@app.route('/admin/ai-insights')
+@login_required
+@admin_required
+def admin_ai_insights():
+    """AI insights and recommendations"""
+    risk_analysis = calculate_default_risk_analysis()
+    
+    # Generate AI recommendations
+    recommendations = []
+    high_risk_members = [r for r in risk_analysis['predictions'] if r['risk_level'] == 'High']
+    
+    if high_risk_members:
+        recommendations.append({
+            'type': 'warning',
+            'title': 'High Risk Members Detected',
+            'message': f'{len(high_risk_members)} members have high default risk. Consider reviewing their loan applications carefully.',
+            'action': 'Review high-risk members'
+        })
+    
+    inactive_members = [r for r in risk_analysis['predictions'] if 'Inactive member' in r['risk_factors']]
+    if inactive_members:
+        recommendations.append({
+            'type': 'info',
+            'title': 'Member Engagement',
+            'message': f'{len(inactive_members)} members show low activity. Consider engagement strategies.',
+            'action': 'Send engagement notifications'
+        })
+    
+    return render_template('admin/ai_insights.html', 
+                         risk_analysis=risk_analysis, 
+                         recommendations=recommendations)
 
 @app.route('/admin/send-notification', methods=['GET', 'POST'])
 @login_required

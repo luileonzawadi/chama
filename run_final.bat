@@ -1,3 +1,0 @@
-@echo off
-echo Starting Final Chama Management System...
-python final_app.py

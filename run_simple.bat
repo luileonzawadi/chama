@@ -1,3 +1,0 @@
-@echo off
-echo Starting Simple Chama Management System...
-python simple_blueprint_app.py

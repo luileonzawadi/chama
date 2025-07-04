@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Account Settings</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('account.profile') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">View Profile</h6>
+                                <small class="text-muted">→</small>
+                            </div>
+                            <p class="mb-1">View your account information and member details</p>
+                        </a>
+                        <a href="{{ url_for('account.edit_profile') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Edit Profile</h6>
+                                <small class="text-muted">→</small>
+                            </div>
+                            <p class="mb-1">Update your username and account information</p>
+                        </a>
+                        <a href="{{ url_for('account.change_password') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Change Password</h6>
+                                <small class="text-muted">→</small>
+                            </div>
+                            <p class="mb-1">Update your account password for security</p>
+                        </a>
+                        <a href="{{ url_for('notifications') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Notifications</h6>
+                                <small class="text-muted">→</small>
+                            </div>
+                            <p class="mb-1">View and manage your notifications</p>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

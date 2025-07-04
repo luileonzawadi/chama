@@ -8,8 +8,8 @@
             <p class="lead text-muted">Manage your chama activities and track your financial progress</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ url_for('apply_loan') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-hand-holding-usd me-2"></i>Apply for Loan
+            <a href="{{ url_for('discussions') }}" class="btn btn-info btn-lg">
+                <i class="fas fa-comments me-2"></i>Join Discussions
             </a>
         </div>
     </div>
@@ -79,12 +79,12 @@
         <!-- Left Column -->
         <div class="col-md-8">
             <!-- Recent Contributions -->
-            <div class="card mb-4 shadow-sm">
+            <div class="card mb-4 shadow-sm fixed-card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-money-bill-wave me-2"></i>Recent Contributions</span>
                     <a href="{{ url_for('contributions') }}" class="btn btn-primary btn-sm">View All</a>
                 </div>
-                <div class="card-body">
+                <div class="card-body scrollable-content">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
@@ -113,12 +113,12 @@
             </div>
             
             <!-- Loan Applications -->
-            <div class="card mb-4 shadow-sm">
+            <div class="card mb-4 shadow-sm fixed-card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-hand-holding-usd me-2"></i>Loan Applications</span>
                     <a href="{{ url_for('apply_loan') }}" class="btn btn-primary btn-sm">Apply for Loan</a>
                 </div>
-                <div class="card-body">
+                <div class="card-body scrollable-content">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
@@ -161,7 +161,7 @@
             </div>
             
             <!-- Recent Discussions -->
-            <div class="card mb-4 shadow-sm">
+            <div class="card mb-4 shadow-sm fixed-card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-comments me-2"></i>Recent Discussions</span>
                     <div>
@@ -169,7 +169,7 @@
                         <a href="{{ url_for('create_discussion') }}" class="btn btn-primary btn-sm">Start Discussion</a>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body scrollable-content">
                     {% for discussion in discussions %}
                     <div class="mb-3">
                         <h5><a href="{{ url_for('view_discussion', discussion_id=discussion.id) }}" class="text-decoration-none">{{ discussion.title }}</a></h5>
@@ -191,80 +191,9 @@
         
         <!-- Right Column -->
         <div class="col-md-4">
-            <!-- User Profile Card -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-white">
-                    <i class="fas fa-user-circle me-2"></i>My Profile
-                </div>
-                <div class="card-body text-center">
-                    <div class="avatar mb-3">
-                        <i class="fas fa-user-circle fa-5x text-primary"></i>
-                    </div>
-                    <h5>{{ current_user.username }}</h5>
-                    <p class="text-muted">
-                        {% if current_user.is_admin %}
-                            Admin User
-                        {% else %}
-                            Regular Member
-                        {% endif %}
-                    </p>
-                    <a href="#" class="btn btn-sm btn-outline-primary">Edit Profile</a>
-                </div>
-            </div>
-            
-            <!-- Notifications -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-bell me-2"></i>Notifications</span>
-                    <a href="{{ url_for('notifications') }}" class="btn btn-primary btn-sm">View All</a>
-                </div>
-                <div class="card-body">
-                    {% for notification in notifications %}
-                    <div class="alert {% if notification.is_read %}alert-secondary{% else %}alert-primary{% endif %} mb-2">
-                        <h6>{{ notification.title }}</h6>
-                        <p class="mb-1">{{ notification.message|truncate(50) }}</p>
-                        <small class="text-muted">{{ notification.date.strftime('%Y-%m-%d %H:%M') }}</small>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-3">
-                        <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
-                        <p>No notifications found</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <!-- My Members -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-users me-2"></i>My Members</span>
-                    {% if current_user.is_admin %}
-                        <a href="{{ url_for('main.add_member') }}" class="btn btn-primary btn-sm">Add Member</a>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for member in members %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ member.name }}
-                            <span class="badge bg-{% if member.status == 'Active' %}success{% else %}secondary{% endif %} rounded-pill">{{ member.status }}</span>
-                        </li>
-                        {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-user-plus fa-2x text-muted mb-2"></i>
-                            <p>No members found</p>
-                            {% if current_user.is_admin %}
-                                <a href="{{ url_for('add_member') }}" class="btn btn-sm btn-primary">Add your first member</a>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-            
             <!-- Quick Actions -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
                     <i class="fas fa-bolt me-2"></i>Quick Actions
                 </div>
                 <div class="card-body">
@@ -274,15 +203,194 @@
                                 <i class="fas fa-user-plus me-2"></i>Add Member
                             </a>
                         {% endif %}
-                        <a href="{{ url_for('apply_loan') }}" class="btn btn-outline-warning">
-                            <i class="fas fa-hand-holding-usd me-2"></i>Apply for Loan
+                        <a href="{{ url_for('add_contribution') }}" class="btn btn-outline-success">
+                            <i class="fas fa-money-bill-wave me-2"></i>Add Contribution
                         </a>
-                        <a href="{{ url_for('create_discussion') }}" class="btn btn-outline-info">
-                            <i class="fas fa-comment-dots me-2"></i>Start Discussion
+                        <a href="{{ url_for('discussions') }}" class="btn btn-outline-info">
+                            <i class="fas fa-comments me-2"></i>View Discussions
                         </a>
                     </div>
                 </div>
             </div>
+            
+            <!-- Notifications -->
+            <div class="card mb-4 shadow-sm fixed-card-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-bell me-2 text-warning"></i>Recent Notifications</span>
+                    <a href="{{ url_for('notifications') }}" class="btn btn-outline-primary btn-sm">View All</a>
+                </div>
+                <div class="card-body scrollable-content-sm">
+                    {% for notification in notifications[:3] %}
+                    <div class="notification-item mb-2 p-2 rounded {% if not notification.is_read %}bg-light border-start border-primary border-3{% endif %}">
+                        <h6 class="mb-1 small fw-bold">{{ notification.title }}</h6>
+                        <p class="mb-1 small text-muted">{{ notification.message|truncate(60) }}</p>
+                        <small class="text-muted">{{ notification.date.strftime('%b %d, %H:%M') }}</small>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No notifications</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Members Summary -->
+            <div class="card mb-4 shadow-sm fixed-card-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-users me-2 text-primary"></i>Members Overview</span>
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('add_member') }}" class="btn btn-outline-primary btn-sm">Add Member</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <h4 class="text-primary mb-1">{{ members|length }}</h4>
+                            <small class="text-muted">Total</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success mb-1">{{ active_members|length }}</h4>
+                            <small class="text-muted">Active</small>
+                        </div>
+                    </div>
+                    <div class="scrollable-content-sm">
+                        {% if members[:4] %}
+                            <div class="recent-members">
+                                {% for member in members[:4] %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                    <span class="small fw-medium">{{ member.name }}</span>
+                                    <span class="badge bg-{{ 'success' if member.status == 'Active' else 'secondary' }} rounded-pill">{{ member.status }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-3">
+                                <i class="fas fa-user-plus fa-2x text-muted mb-2"></i>
+                                <p class="text-muted mb-2">No members yet</p>
+                                {% if current_user.is_admin %}
+                                    <a href="{{ url_for('add_member') }}" class="btn btn-sm btn-primary">Add First Member</a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="card shadow-sm fixed-card-sm">
+                <div class="card-header bg-white">
+                    <i class="fas fa-clock me-2 text-info"></i>Recent Activity
+                </div>
+                <div class="card-body scrollable-content-sm">
+                    {% if contributions[:3] or loans[:2] %}
+                        <div class="activity-timeline">
+                            {% for contribution in contributions[:3] %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="activity-icon bg-success text-white me-3">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="small fw-medium">Contribution Added</div>
+                                    <div class="text-muted small">${{ contribution.amount }} • {{ contribution.date.strftime('%b %d') }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% for loan in loans[:2] %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="activity-icon bg-warning text-white me-3">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="small fw-medium">Loan Application</div>
+                                    <div class="text-muted small">${{ loan.amount }} • 
+                                        <span class="badge bg-{{ 'success' if loan.status == 'Approved' else 'warning' if loan.status == 'Pending' else 'danger' }} badge-sm">{{ loan.status }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No recent activity</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+<style>
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.notification-item {
+    transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa !important;
+}
+
+.badge-sm {
+    font-size: 0.7rem;
+    padding: 0.25em 0.5em;
+}
+
+/* Fixed card heights with scrollable content */
+.fixed-card {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.fixed-card-sm {
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.scrollable-content-sm {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Custom scrollbar */
+.scrollable-content::-webkit-scrollbar,
+.scrollable-content-sm::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-track,
+.scrollable-content-sm::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb,
+.scrollable-content-sm::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover,
+.scrollable-content-sm::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>
         </div>
     </div>
 </div>

@@ -8,6 +8,10 @@ def init_discussion_model(db):
         date = db.Column(db.DateTime, default=datetime.utcnow)
         user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
         
+        # Relationships
+        user = db.relationship('User', backref='discussions')
+        messages = db.relationship('Message', backref='discussion', cascade='all, delete-orphan')
+        
         def __repr__(self):
             return f'<Discussion {self.id}>'
     

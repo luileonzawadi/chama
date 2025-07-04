@@ -8,6 +8,9 @@ def init_message_model(db):
         user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
         discussion_id = db.Column(db.Integer, db.ForeignKey('discussion.id'), nullable=False)
         
+        # Relationships
+        user = db.relationship('User', backref='messages')
+        
         def __repr__(self):
             return f'<Message {self.id}>'
     

@@ -14,13 +14,21 @@ def create_auth_blueprint(db, User):
             user = User.query.filter_by(username=username).first()
             
             if user and check_password_hash(user.password, password):
+                user.update_last_login()
+                db.session.commit()
                 login_user(user)
+                
+                # Check if this is first login (no previous login recorded)
+                if not user.last_login and not user.is_admin:
+                    flash('Please change your temporary password', 'warning')
+                    return redirect(url_for('change_password'))
+                
                 next_page = request.args.get('next')
                 if next_page:
                     return redirect(next_page)
                 if user.is_admin:
-                    return redirect(url_for('admin.dashboard'))
-                return redirect(url_for('main.index'))
+                    return redirect(url_for('admin_dashboard'))
+                return redirect(url_for('index'))
             else:
                 flash('Invalid username or password', 'danger')
         
@@ -32,30 +40,9 @@ def create_auth_blueprint(db, User):
         logout_user()
         return redirect(url_for('auth.login'))
     
-    @auth_bp.route('/register', methods=['GET', 'POST'])
+    @auth_bp.route('/register')
     def register():
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
-            
-            # Check if user already exists
-            user_exists = User.query.filter_by(username=username).first()
-            
-            if user_exists:
-                flash('Username already exists', 'danger')
-            else:
-                # Create new user
-                new_user = User(
-                    username=username,
-                    password=generate_password_hash(password),
-                    is_admin=False
-                )
-                db.session.add(new_user)
-                db.session.commit()
-                
-                flash('Registration successful! Please login.', 'success')
-                return redirect(url_for('auth.login'))
-        
-        return render_template('auth/register.html')
+        flash('Registration is restricted. Please contact an administrator to create your account.', 'info')
+        return redirect(url_for('auth.login'))
     
     return auth_bp

@@ -1,3 +1,0 @@
-@echo off
-echo Starting Fixed Chama Management System...
-python app.py

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}AI Risk Analysis{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i>AI Default Risk Analysis</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Risk Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <h2 class="text-danger">{{ risk_analysis.summary.high_risk }}</h2>
+                    <p class="mb-0">High Risk Members</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h2 class="text-warning">{{ risk_analysis.summary.medium_risk }}</h2>
+                    <p class="mb-0">Medium Risk Members</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h2 class="text-success">{{ risk_analysis.summary.low_risk }}</h2>
+                    <p class="mb-0">Low Risk Members</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h2 class="text-info">{{ risk_analysis.summary.total_analyzed }}</h2>
+                    <p class="mb-0">Total Analyzed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Risk Analysis -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Detailed Member Risk Assessment</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Member</th>
+                            <th>Risk Level</th>
+                            <th>Risk Score</th>
+                            <th>Contributions</th>
+                            <th>Loans</th>
+                            <th>Active Loans</th>
+                            <th>Risk Factors</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prediction in risk_analysis.predictions %}
+                        <tr class="{% if prediction.risk_level == 'High' %}table-danger{% elif prediction.risk_level == 'Medium' %}table-warning{% endif %}">
+                            <td>
+                                <strong>{{ prediction.member.name }}</strong>
+                                <br><small class="text-muted">{{ prediction.member.phone }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ prediction.risk_color }} fs-6">
+                                    {{ prediction.risk_level }} Risk
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress me-2" style="width: 80px; height: 25px;">
+                                        <div class="progress-bar bg-{{ prediction.risk_color }}" 
+                                             style="width: {{ prediction.risk_score }}%">
+                                        </div>
+                                    </div>
+                                    <span class="fw-bold">{{ prediction.risk_score }}%</span>
+                                </div>
+                            </td>
+                            <td>${{ "%.2f"|format(prediction.total_contributions) }}</td>
+                            <td>${{ "%.2f"|format(prediction.total_loans) }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ prediction.active_loans_count }}</span>
+                            </td>
+                            <td>
+                                {% for factor in prediction.risk_factors %}
+                                    <span class="badge bg-secondary me-1 mb-1">{{ factor }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if prediction.risk_level == 'High' %}
+                                    <button class="btn btn-sm btn-warning" onclick="reviewMember({{ prediction.member.id }})">
+                                        <i class="fas fa-eye"></i> Review
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewMember({{ prediction.member.id }})">
+                                        <i class="fas fa-user"></i> View
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function reviewMember(memberId) {
+    alert('Review member functionality - Member ID: ' + memberId);
+    // Implement member review functionality
+}
+
+function viewMember(memberId) {
+    alert('View member functionality - Member ID: ' + memberId);
+    // Implement member view functionality
+}
+</script>
+
+<style>
+.fs-6 {
+    font-size: 0.875rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,.075);
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+</style>
+{% endblock %}
