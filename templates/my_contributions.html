@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div>
+            <h2><i class="fas fa-history me-2"></i>My Contributions</h2>
+            <p class="text-muted mb-0">Track your contribution history and progress</p>
+        </div>
+        <a href="{{ url_for('contribute') }}" class="btn btn-success mt-2 mt-md-0">
+            <i class="fas fa-plus me-2"></i>New Contribution
+        </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-6 col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-1">${{ "%.2f"|format(total) }}</h3>
+                    <small>Total Contributed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-1">{{ contributions|length }}</h3>
+                    <small>Total Contributions</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 mt-3 mt-md-0">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-1">${{ "%.2f"|format(total / contributions|length) if contributions else 0 }}</h3>
+                    <small>Average Amount</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contributions List -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Contribution History</h5>
+        </div>
+        <div class="card-body">
+            {% if contributions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contribution in contributions %}
+                            <tr>
+                                <td>
+                                    <div class="fw-medium">{{ contribution.date.strftime('%B %d, %Y') }}</div>
+                                    <small class="text-muted">{{ contribution.date.strftime('%I:%M %p') }}</small>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-success">${{ "%.2f"|format(contribution.amount) }}</span>
+                                </td>
+                                <td>{{ contribution.description or 'Regular contribution' }}</td>
+                                <td>
+                                    <span class="badge bg-success">Completed</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-money-bill-wave fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No contributions yet</h4>
+                    <p class="text-muted mb-4">Start contributing to your chama to track your progress here.</p>
+                    <a href="{{ url_for('contribute') }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-plus me-2"></i>Make First Contribution
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

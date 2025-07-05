@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div>
+            <h2><i class="fas fa-calendar me-2"></i>Chama Activities</h2>
+            <p class="text-muted mb-0">Stay updated with upcoming events and meetings</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Activities -->
+        <div class="col-12 col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Upcoming Activities</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming %}
+                        {% for activity in upcoming %}
+                        <div class="activity-item mb-3 p-3 border rounded">
+                            <div class="d-flex align-items-start">
+                                <div class="activity-icon bg-primary text-white me-3">
+                                    {% if activity.type == 'meeting' %}
+                                        <i class="fas fa-users"></i>
+                                    {% elif activity.type == 'review' %}
+                                        <i class="fas fa-chart-line"></i>
+                                    {% else %}
+                                        <i class="fas fa-calendar"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ activity.title }}</h6>
+                                    <div class="text-primary fw-medium mb-2">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {{ activity.date.strftime('%B %d, %Y at %I:%M %p') }}
+                                    </div>
+                                    {% if activity.description %}
+                                        <p class="text-muted mb-0">{{ activity.description }}</p>
+                                    {% endif %}
+                                    <div class="mt-2">
+                                        <span class="badge bg-{{ 'success' if activity.type == 'meeting' else 'info' if activity.type == 'review' else 'secondary' }}">
+                                            {{ activity.type.title() }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No upcoming activities</h5>
+                            <p class="text-muted">Check back later for new events and meetings.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Past Activities -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activities</h5>
+                </div>
+                <div class="card-body">
+                    {% if past %}
+                        {% for activity in past %}
+                        <div class="activity-item mb-3 p-2 border-start border-3 border-secondary">
+                            <div class="d-flex align-items-start">
+                                <div class="activity-icon-sm bg-secondary text-white me-2">
+                                    {% if activity.type == 'meeting' %}
+                                        <i class="fas fa-users"></i>
+                                    {% elif activity.type == 'review' %}
+                                        <i class="fas fa-chart-line"></i>
+                                    {% else %}
+                                        <i class="fas fa-calendar"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ activity.title }}</h6>
+                                    <small class="text-muted">
+                                        {{ activity.date.strftime('%B %d, %Y') }}
+                                    </small>
+                                    {% if activity.description %}
+                                        <p class="text-muted mb-0 small">{{ activity.description|truncate(80) }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No past activities</h5>
+                            <p class="text-muted">Activity history will appear here.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.activity-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.activity-icon-sm {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.activity-item {
+    transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+    background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}

@@ -11,16 +11,92 @@
     <style>
         body {
             background-color: #f8f9fa;
+            font-size: 14px;
         }
         .navbar {
             margin-bottom: 20px;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+                border-radius: 8px;
+            }
+            
+            .table-responsive {
+                font-size: 12px;
+            }
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            
+            .btn-lg {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.3rem; }
+            h3 { font-size: 1.2rem; }
+            h4 { font-size: 1.1rem; }
+            
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+            
+            .dropdown-menu {
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 5px;
+            }
+            
+            .card-body {
+                padding: 1rem 0.75rem;
+            }
+            
+            .table-responsive {
+                font-size: 11px;
+            }
+            
+            .btn-group-vertical .btn {
+                margin-bottom: 5px;
+            }
+        }
+        
+        /* Touch-friendly elements */
+        .btn, .form-control, .form-select {
+            min-height: 44px;
+        }
+        
+        /* Better mobile tables */
+        @media (max-width: 768px) {
+            .mobile-stack {
+                display: block !important;
+                width: 100% !important;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
     {% include 'navbar.html' %}
     
-    <div class="container">
+    <div class="container-fluid px-2 px-md-3">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
