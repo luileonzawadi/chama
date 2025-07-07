@@ -401,11 +401,24 @@ def add_member():
         name = request.form.get('name')
         phone = request.form.get('phone')
         email = request.form.get('email')
+        username = request.form.get('username')
         
-        member = Member(name=name, phone=phone, email=email, user_id=current_user.id)
+        # Check if username already exists
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists!', 'danger')
+            return render_template('add_member.html')
+        
+        # Create user account with default password
+        user = User(username=username, password=generate_password_hash('0000'), is_admin=False)
+        db.session.add(user)
+        db.session.flush()  # Get user ID
+        
+        # Create member profile
+        member = Member(name=name, phone=phone, email=email, user_id=user.id)
         db.session.add(member)
         db.session.commit()
-        flash('Member added successfully!', 'success')
+        
+        flash(f'Member added successfully! Username: {username}, Default password: 0000', 'success')
         return redirect(url_for('admin_members'))
     
     return render_template('add_member.html')
@@ -434,6 +447,47 @@ def send_notification():
     
     users = User.query.filter_by(is_admin=False).all()
     return render_template('admin/send_notification.html', users=users)
+
+@app.route('/admin/reset-password/<int:user_id>')
+@login_required
+@admin_required
+def reset_password(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.is_admin:
+        flash('Cannot reset admin password!', 'danger')
+        return redirect(url_for('admin_users'))
+    
+    user.password = generate_password_hash('0000')
+    db.session.commit()
+    flash(f'Password reset for {user.username}. New password: 0000', 'success')
+    return redirect(url_for('admin_users'))
+
+@app.route('/account/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not check_password_hash(current_user.password, current_password):
+            flash('Current password is incorrect', 'danger')
+            return render_template('account/change_password.html')
+        
+        if new_password != confirm_password:
+            flash('New passwords do not match', 'danger')
+            return render_template('account/change_password.html')
+        
+        if len(new_password) < 4:
+            flash('Password must be at least 4 characters long', 'danger')
+            return render_template('account/change_password.html')
+        
+        current_user.password = generate_password_hash(new_password)
+        db.session.commit()
+        flash('Password changed successfully', 'success')
+        return redirect(url_for('account_profile'))
+    
+    return render_template('account/change_password.html')
 
 # Create database tables and add sample data
 with app.app_context():
