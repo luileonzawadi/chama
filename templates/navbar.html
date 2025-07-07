@@ -35,9 +35,13 @@
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                    <a class="nav-link dropdown-toggle user-dropdown" href="#" id="navbarDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-1"></i>{{ current_user.username }}
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="online-dot"></span>
+                        </div>
+                        <span class="ms-1">{{ current_user.username }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="{{ url_for('account_profile') }}">
@@ -60,3 +64,43 @@
         </div>
     </div>
 </nav>
+
+<style>
+.user-dropdown {
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    position: relative;
+    display: inline-block;
+}
+
+.online-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background-color: #28a745;
+    border: 2px solid white;
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+    0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+.navbar-nav .nav-link.user-dropdown:hover .online-dot {
+    background-color: #34ce57;
+}
+</style>

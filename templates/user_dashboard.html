@@ -2,22 +2,16 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Welcome Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="bg-gradient-primary text-white rounded-3 p-4 shadow">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                    <div>
-                        <h2 class="mb-2">Welcome, {{ member.name if member else current_user.username }}!</h2>
-                        <p class="mb-0 opacity-75">Manage your chama activities and track your progress</p>
-                    </div>
-                    <div class="mt-3 mt-md-0">
-                        <span class="badge bg-success fs-6 me-2">
-                            <i class="fas fa-circle me-1"></i>Online
-                        </span>
-                        <span class="text-white-50">{{ online_members|length }} members online</span>
-                    </div>
-                </div>
+    <!-- Welcome Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="welcomeToast" class="toast" role="alert" data-bs-autohide="true" data-bs-delay="4000">
+            <div class="toast-header bg-primary text-white">
+                <i class="fas fa-hand-wave me-2"></i>
+                <strong class="me-auto">Welcome back!</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                Hello {{ member.name if member else current_user.username }}! Ready to manage your chama today?
             </div>
         </div>
     </div>
@@ -66,8 +60,8 @@
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
                     <div class="dropdown">
-                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-tasks me-1"></i>Choose Action
+                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tasks me-1"></i>Actions
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end action-dropdown">
                             <li>
@@ -115,7 +109,7 @@
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2 text-success"></i>Recent Contributions</h5>
-                    <a href="{{ url_for('my_contributions') }}" class="btn btn-outline-primary btn-sm">View All</a>
+                    <a href="{{ url_for('my_contributions') }}" class="btn btn-outline-primary btn-sm px-2 py-1">View All</a>
                 </div>
                 <div class="card-body">
                     {% if contributions %}
@@ -143,7 +137,7 @@
                         <div class="text-center py-3">
                             <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
                             <p class="text-muted">No contributions yet</p>
-                            <a href="{{ url_for('contribute') }}" class="btn btn-success">Make First Contribution</a>
+                            <a href="{{ url_for('contribute') }}" class="btn btn-success btn-sm">Make First Contribution</a>
                         </div>
                     {% endif %}
                 </div>
@@ -153,7 +147,7 @@
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-calendar me-2 text-primary"></i>Upcoming Activities</h5>
-                    <a href="{{ url_for('activities') }}" class="btn btn-outline-primary btn-sm">View All</a>
+                    <a href="{{ url_for('activities') }}" class="btn btn-outline-primary btn-sm px-2 py-1">View All</a>
                 </div>
                 <div class="card-body">
                     {% if upcoming_activities %}
@@ -215,7 +209,7 @@
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-comments me-2 text-info"></i>Recent Discussions</h5>
-                    <a href="{{ url_for('discussions') }}" class="btn btn-outline-primary btn-sm">View All</a>
+                    <a href="{{ url_for('discussions') }}" class="btn btn-outline-primary btn-sm px-2 py-1">View All</a>
                 </div>
                 <div class="card-body">
                     {% if discussions %}
@@ -238,7 +232,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-bell me-2 text-warning"></i>Notifications</h5>
-                    <a href="{{ url_for('notifications') }}" class="btn btn-outline-primary btn-sm">View All</a>
+                    <a href="{{ url_for('notifications') }}" class="btn btn-outline-primary btn-sm px-2 py-1">View All</a>
                 </div>
                 <div class="card-body">
                     {% if notifications %}
@@ -310,17 +304,44 @@
     width: 25px;
 }
 
+/* Compact button styling */
+.btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.dropdown-toggle {
+    font-size: 0.8rem;
+}
+
+.card-header .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+}
+
 @media (max-width: 768px) {
     .card-body {
         padding: 1rem 0.75rem;
     }
     
     .btn {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .btn-sm {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
     }
     
     .action-dropdown {
-        min-width: 250px;
+        min-width: 220px;
+    }
+    
+    .dropdown-toggle {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
     }
 }
 </style>
@@ -332,6 +353,12 @@
         duration: 800,
         easing: 'ease-in-out',
         once: true
+    });
+    
+    // Show welcome toast on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        var welcomeToast = new bootstrap.Toast(document.getElementById('welcomeToast'));
+        welcomeToast.show();
     });
 </script>
 {% endblock %}
