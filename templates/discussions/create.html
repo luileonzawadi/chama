@@ -1,37 +1,209 @@
 {% extends "base.html" %}
 
-{% block title %}Create Discussion{% endblock %}
-
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0"><i class="fas fa-comment-dots me-2"></i>Start New Discussion</h4>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <div class="icon-circle bg-primary text-white mx-auto mb-3">
+                    <i class="fas fa-plus-circle fa-2x"></i>
                 </div>
-                <div class="card-body">
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Discussion Title</label>
-                            <input type="text" class="form-control" id="title" name="title" required 
-                                   placeholder="What would you like to discuss?">
+                <h2 class="fw-bold mb-2">Start a New Discussion</h2>
+                <p class="text-muted">Share your thoughts, ask questions, or start a conversation with your chama community</p>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body p-5">
+                    <form method="POST" class="discussion-form">
+                        <!-- Title Input -->
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-semibold mb-2">
+                                <i class="fas fa-heading text-primary me-2"></i>Discussion Title
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="title" 
+                                   name="title" 
+                                   placeholder="What would you like to discuss?"
+                                   required>
+                            <div class="form-text">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Make it clear and engaging to attract more participants
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="content" class="form-label">Your Message</label>
-                            <textarea class="form-control" id="content" name="content" rows="4" required
-                                      placeholder="Share your thoughts, questions, or ideas..."></textarea>
+
+                        <!-- Content Textarea -->
+                        <div class="mb-4">
+                            <label for="content" class="form-label fw-semibold mb-2">
+                                <i class="fas fa-edit text-primary me-2"></i>Your Message
+                            </label>
+                            <textarea class="form-control" 
+                                      id="content" 
+                                      name="content" 
+                                      rows="8" 
+                                      placeholder="Share your thoughts, ideas, or questions here..."
+                                      required></textarea>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Be respectful and constructive in your discussion
+                            </div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+
+                        <!-- Discussion Guidelines -->
+                        <div class="alert alert-light border-0 mb-4">
+                            <h6 class="alert-heading fw-semibold">
+                                <i class="fas fa-handshake text-success me-2"></i>Community Guidelines
+                            </h6>
+                            <ul class="mb-0 small">
+                                <li>Keep discussions relevant to chama activities and goals</li>
+                                <li>Be respectful and constructive in your comments</li>
+                                <li>Avoid sharing sensitive financial information publicly</li>
+                                <li>Help create a welcoming environment for all members</li>
+                            </ul>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3 justify-content-end">
+                            <a href="{{ url_for('discussions') }}" class="btn btn-light btn-lg px-4">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
                                 <i class="fas fa-paper-plane me-2"></i>Start Discussion
                             </button>
-                            <a href="{{ url_for('discussions') }}" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Tips Section -->
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <div class="icon-circle bg-success text-white mx-auto mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h6 class="fw-semibold">Engage Members</h6>
+                        <p class="text-muted small">Ask questions that encourage participation from all members</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <div class="icon-circle bg-info text-white mx-auto mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h6 class="fw-semibold">Share Ideas</h6>
+                        <p class="text-muted small">Contribute valuable insights and suggestions for the group</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <div class="icon-circle bg-warning text-white mx-auto mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h6 class="fw-semibold">Build Community</h6>
+                        <p class="text-muted small">Foster connections and strengthen relationships within the chama</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.discussion-form .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.discussion-form .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.discussion-form .form-control-lg {
+    padding: 16px 20px;
+    font-size: 1.1rem;
+}
+
+.discussion-form textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.card {
+    border-radius: 20px;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.alert {
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+    
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .btn-lg {
+        padding: 12px 24px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('title');
+    const contentTextarea = document.getElementById('content');
+    
+    // Auto-resize textarea
+    contentTextarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+    
+    // Character counter for title
+    titleInput.addEventListener('input', function() {
+        const maxLength = 100;
+        const currentLength = this.value.length;
+        
+        if (currentLength > maxLength) {
+            this.value = this.value.substring(0, maxLength);
+        }
+    });
+});
+</script>
 {% endblock %}

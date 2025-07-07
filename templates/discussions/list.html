@@ -1,54 +1,115 @@
 {% extends "base.html" %}
 
-{% block title %}Discussions{% endblock %}
-
 {% block content %}
-<div class="container-fluid mt-4">
+<div class="container-fluid py-4">
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-gradient-primary text-white rounded-3 p-4 shadow">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="bg-gradient-primary text-white rounded-4 p-4 shadow-lg">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                     <div>
-                        <h1 class="mb-2"><i class="fas fa-comments me-3"></i>Community Discussions</h1>
-                        <p class="mb-0 opacity-75">Connect, share ideas, and collaborate with fellow chama members</p>
+                        <h2 class="mb-2 fw-bold">
+                            <i class="fas fa-comments me-3"></i>Community Discussions
+                        </h2>
+                        <p class="mb-0 opacity-75">Connect, share ideas, and engage with your chama community</p>
                     </div>
-                    <a href="{{ url_for('create_discussion') }}" class="btn btn-light btn-lg">
-                        <i class="fas fa-plus me-2"></i>New Discussion
-                    </a>
+                    <div class="mt-3 mt-md-0">
+                        <a href="{{ url_for('create_discussion') }}" class="btn btn-light btn-lg px-4 py-2 shadow-sm">
+                            <i class="fas fa-plus-circle me-2"></i>Start New Discussion
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">
+                        <i class="fas fa-fire fa-2x"></i>
+                    </div>
+                    <h5 class="card-title">{{ discussions|length }}</h5>
+                    <p class="card-text text-muted">Active Discussions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <h5 class="card-title">{{ discussions|length }}</h5>
+                    <p class="card-text text-muted">Total Topics</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h5 class="card-title">Today</h5>
+                    <p class="card-text text-muted">Last Activity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discussions List -->
     <div class="row">
-        <!-- Discussions List -->
-        <div class="col-lg-8">
+        <div class="col-12">
             {% if discussions %}
-                <div class="row">
+                <div class="row g-4">
                     {% for discussion in discussions %}
-                    <div class="col-12 mb-4">
-                        <div class="card border-0 shadow-sm hover-shadow transition-all">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm hover-lift">
                             <div class="card-body p-4">
-                                <div class="d-flex align-items-start mb-3">
-                                    <div class="avatar-circle bg-primary text-white me-3">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h4 class="card-title mb-2">
-                                            <a href="{{ url_for('view_discussion', discussion_id=discussion.id) }}" 
-                                               class="text-decoration-none text-dark hover-primary">{{ discussion.title }}</a>
-                                        </h4>
-                                        <div class="d-flex align-items-center text-muted mb-2">
-                                            <span class="me-3"><i class="fas fa-user me-1"></i>{{ discussion.user.username }}</span>
-                                            <span class="me-3"><i class="fas fa-clock me-1"></i>{{ discussion.date.strftime('%b %d, %Y') }}</span>
-                                            <span class="badge bg-light text-dark"><i class="fas fa-comments me-1"></i>{{ discussion.messages|length }} replies</span>
+                                <div class="d-flex align-items-start">
+                                    <!-- Avatar -->
+                                    <div class="flex-shrink-0 me-3">
+                                        <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-user"></i>
                                         </div>
-                                        <p class="card-text text-muted mb-3">{{ discussion.content|truncate(200) }}</p>
-                                        <a href="{{ url_for('view_discussion', discussion_id=discussion.id) }}" 
-                                           class="btn btn-primary btn-sm rounded-pill">
-                                            <i class="fas fa-arrow-right me-1"></i>Join Discussion
-                                        </a>
+                                    </div>
+                                    
+                                    <!-- Content -->
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-1">
+                                                <a href="{{ url_for('view_discussion', discussion_id=discussion.id) }}" 
+                                                   class="text-decoration-none text-dark hover-primary">
+                                                    {{ discussion.title }}
+                                                </a>
+                                            </h5>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                {{ discussion.date.strftime('%b %d, %Y') }}
+                                            </small>
+                                        </div>
+                                        
+                                        <p class="card-text text-muted mb-3">
+                                            {{ discussion.content[:150] }}{% if discussion.content|length > 150 %}...{% endif %}
+                                        </p>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-light text-dark me-2">
+                                                    <i class="fas fa-user me-1"></i>{{ discussion.user.username }}
+                                                </span>
+                                                <span class="badge bg-primary">
+                                                    <i class="fas fa-comments me-1"></i>{{ discussion.messages|length }} replies
+                                                </span>
+                                            </div>
+                                            <a href="{{ url_for('view_discussion', discussion_id=discussion.id) }}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-arrow-right me-1"></i>Join Discussion
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -57,98 +118,75 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <div class="mb-4">
-                            <i class="fas fa-comments fa-5x text-primary opacity-50"></i>
-                        </div>
-                        <h3 class="text-muted mb-3">No discussions yet</h3>
-                        <p class="text-muted mb-4">Be the first to start a conversation and connect with your chama members!</p>
-                        <a href="{{ url_for('create_discussion') }}" class="btn btn-primary btn-lg rounded-pill">
-                            <i class="fas fa-plus me-2"></i>Start First Discussion
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="empty-state">
+                        <i class="fas fa-comments fa-4x text-muted mb-4"></i>
+                        <h4 class="text-muted mb-3">No discussions yet</h4>
+                        <p class="text-muted mb-4">Be the first to start a conversation with your chama community!</p>
+                        <a href="{{ url_for('create_discussion') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus-circle me-2"></i>Start First Discussion
                         </a>
                     </div>
                 </div>
             {% endif %}
         </div>
-        
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Quick Actions -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="mb-0"><i class="fas fa-bolt me-2 text-warning"></i>Quick Start</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('create_discussion') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-chart-line me-2"></i>Investment Ideas
-                        </a>
-                        <a href="{{ url_for('create_discussion') }}" class="btn btn-outline-success">
-                            <i class="fas fa-calendar me-2"></i>Meeting Plans
-                        </a>
-                        <a href="{{ url_for('create_discussion') }}" class="btn btn-outline-warning">
-                            <i class="fas fa-hand-holding-usd me-2"></i>Loan Policies
-                        </a>
-                        <a href="{{ url_for('create_discussion') }}" class="btn btn-outline-info">
-                            <i class="fas fa-lightbulb me-2"></i>General Ideas
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Guidelines -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="mb-0"><i class="fas fa-heart me-2 text-danger"></i>Community Guidelines</h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item border-0 px-0">
-                            <i class="fas fa-check-circle text-success me-2"></i>Be respectful and kind
-                        </div>
-                        <div class="list-group-item border-0 px-0">
-                            <i class="fas fa-check-circle text-success me-2"></i>Stay on topic
-                        </div>
-                        <div class="list-group-item border-0 px-0">
-                            <i class="fas fa-check-circle text-success me-2"></i>Share constructive ideas
-                        </div>
-                        <div class="list-group-item border-0 px-0">
-                            <i class="fas fa-check-circle text-success me-2"></i>Ask questions freely
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
 <style>
-.hover-shadow:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    transform: translateY(-2px);
-}
-
-.transition-all {
-    transition: all 0.3s ease;
-}
-
-.hover-primary:hover {
-    color: var(--bs-primary) !important;
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
 }
 
 .avatar-circle {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 1.2rem;
 }
 
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.hover-primary:hover {
+    color: #007bff !important;
+}
+
+.empty-state {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+.badge {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem !important;
+    }
 }
 </style>
 {% endblock %}

@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Loans</h2>
-    <a href="{{ url_for('apply_loan') }}" class="btn btn-primary">Apply for Loan</a>
+    <a href="{{ url_for('request_loan') }}" class="btn btn-primary">Apply for Loan</a>
 </div>
 
 <div class="card">
@@ -46,7 +46,7 @@
             </table>
         </div>
         {% else %}
-        <p class="text-muted">No loans found. <a href="{{ url_for('apply_loan') }}">Apply for your first loan</a>.</p>
+        <p class="text-muted">No loans found. <a href="{{ url_for('request_loan') }}">Apply for your first loan</a>.</p>
         {% endif %}
     </div>
 </div>

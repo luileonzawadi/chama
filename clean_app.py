@@ -206,16 +206,6 @@ def request_loan():
     
     return render_template('request_loan.html', member=member)
 
-@app.route('/contributions')
-@login_required
-def contributions():
-    if current_user.is_admin:
-        contributions = Contribution.query.all()
-    else:
-        member_ids = [m.id for m in Member.query.filter_by(user_id=current_user.id).all()]
-        contributions = Contribution.query.filter(Contribution.member_id.in_(member_ids)).all()
-    return render_template('contributions.html', contributions=contributions)
-
 @app.route('/my-contributions')
 @login_required
 def my_contributions():
@@ -244,44 +234,6 @@ def discussions():
     discussions = Discussion.query.order_by(Discussion.date.desc()).all()
     return render_template('discussions/list.html', discussions=discussions)
 
-@app.route('/discussions/create', methods=['GET', 'POST'])
-@login_required
-def create_discussion():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        content = request.form.get('content')
-        
-        discussion = Discussion(title=title, content=content, user_id=current_user.id)
-        db.session.add(discussion)
-        db.session.commit()
-        flash('Discussion created successfully!', 'success')
-        return redirect(url_for('discussions'))
-    
-    return render_template('discussions/create.html')
-
-@app.route('/discussions/<int:discussion_id>')
-@login_required
-def view_discussion(discussion_id):
-    discussion = Discussion.query.get_or_404(discussion_id)
-    messages = Message.query.filter_by(discussion_id=discussion_id).order_by(Message.timestamp).all()
-    return render_template('discussions/view.html', discussion=discussion, messages=messages)
-
-@app.route('/discussions/<int:discussion_id>/message', methods=['POST'])
-@login_required
-def add_message(discussion_id):
-    content = request.form.get('content')
-    if content and content.strip():
-        message = Message(content=content.strip(), user_id=current_user.id, discussion_id=discussion_id)
-        db.session.add(message)
-        db.session.commit()
-    return redirect(url_for('view_discussion', discussion_id=discussion_id))
-
-@app.route('/api/discussions/<int:discussion_id>/messages')
-@login_required
-def get_messages(discussion_id):
-    messages = Message.query.filter_by(discussion_id=discussion_id).order_by(Message.timestamp).all()
-    return {'messages': [{'content': m.content, 'user': m.user.username, 'timestamp': m.timestamp.isoformat()} for m in messages]}
-
 @app.route('/activities')
 @login_required
 def activities():
@@ -294,17 +246,6 @@ def activities():
 def notifications():
     notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.date.desc()).all()
     return render_template('notifications/list.html', notifications=notifications)
-
-@app.route('/account/profile')
-@login_required
-def account_profile():
-    member = Member.query.filter_by(user_id=current_user.id).first()
-    return render_template('account/profile.html', user=current_user, member=member)
-
-@app.route('/account/settings')
-@login_required
-def account_settings():
-    return render_template('account/settings.html', user=current_user)
 
 # Admin Routes
 @app.route('/admin')
@@ -325,13 +266,6 @@ def admin_dashboard():
 def admin_members():
     members = Member.query.all()
     return render_template('admin/members.html', members=members)
-
-@app.route('/admin/users')
-@login_required
-@admin_required
-def admin_users():
-    users = User.query.all()
-    return render_template('admin/users.html', users=users)
 
 @app.route('/admin/loan-requests')
 @login_required
@@ -359,81 +293,6 @@ def reject_loan(loan_id):
     db.session.commit()
     flash('Loan rejected!', 'info')
     return redirect(url_for('admin_loan_requests'))
-
-@app.route('/admin/ai-insights')
-@login_required
-@admin_required
-def admin_ai_insights():
-    risk_analysis = {
-        'summary': {
-            'high_risk': 0,
-            'medium_risk': 0,
-            'low_risk': User.query.count(),
-            'total_analyzed': User.query.count()
-        },
-        'predictions': []
-    }
-    recommendations = []
-    return render_template('admin/ai_insights.html', 
-                         risk_analysis=risk_analysis, 
-                         recommendations=recommendations)
-
-@app.route('/admin/risk-analysis')
-@login_required
-@admin_required
-def admin_risk_analysis():
-    risk_analysis = {
-        'summary': {
-            'high_risk': 0,
-            'medium_risk': 0,
-            'low_risk': User.query.count(),
-            'total_analyzed': User.query.count()
-        },
-        'predictions': []
-    }
-    return render_template('admin/risk_analysis.html', risk_analysis=risk_analysis)
-
-@app.route('/add-member', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def add_member():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        phone = request.form.get('phone')
-        email = request.form.get('email')
-        
-        member = Member(name=name, phone=phone, email=email, user_id=current_user.id)
-        db.session.add(member)
-        db.session.commit()
-        flash('Member added successfully!', 'success')
-        return redirect(url_for('admin_members'))
-    
-    return render_template('add_member.html')
-
-@app.route('/send-notification', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def send_notification():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        message = request.form.get('message')
-        user_id = request.form.get('user_id')
-        
-        if user_id == 'all':
-            users = User.query.filter_by(is_admin=False).all()
-            for user in users:
-                notification = Notification(title=title, message=message, user_id=user.id)
-                db.session.add(notification)
-        else:
-            notification = Notification(title=title, message=message, user_id=int(user_id))
-            db.session.add(notification)
-        
-        db.session.commit()
-        flash('Notification sent successfully!', 'success')
-        return redirect(url_for('admin_dashboard'))
-    
-    users = User.query.filter_by(is_admin=False).all()
-    return render_template('admin/send_notification.html', users=users)
 
 # Create database tables and add sample data
 with app.app_context():

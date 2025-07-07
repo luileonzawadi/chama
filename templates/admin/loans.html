@@ -32,7 +32,7 @@
                             <td>${{ loan.amount }}</td>
                             <td>{{ loan.purpose }}</td>
                             <td>{{ loan.interest_rate }}%</td>
-                            <td>{{ loan.issue_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ loan.date_applied.strftime('%Y-%m-%d') if loan.date_applied else 'N/A' }}</td>
                             <td>{{ loan.due_date.strftime('%Y-%m-%d') }}</td>
                             <td>
                                 {% if loan.status == 'Pending' %}
@@ -48,20 +48,11 @@
                             <td>
                                 {% if loan.status == 'Pending' %}
                                 <div class="btn-group">
-                                    <form method="POST" action="{{ url_for('update_loan_status', loan_id=loan.id) }}" class="me-1">
-                                        <input type="hidden" name="status" value="Approved">
-                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
-                                    </form>
-                                    <form method="POST" action="{{ url_for('update_loan_status', loan_id=loan.id) }}">
-                                        <input type="hidden" name="status" value="Rejected">
-                                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
-                                    </form>
+                                    <a href="{{ url_for('approve_loan', loan_id=loan.id) }}" class="btn btn-sm btn-success me-1">Approve</a>
+                                    <a href="{{ url_for('reject_loan', loan_id=loan.id) }}" class="btn btn-sm btn-danger">Reject</a>
                                 </div>
                                 {% elif loan.status == 'Approved' %}
-                                <form method="POST" action="{{ url_for('update_loan_status', loan_id=loan.id) }}">
-                                    <input type="hidden" name="status" value="Repaid">
-                                    <button type="submit" class="btn btn-sm btn-info">Mark as Repaid</button>
-                                </form>
+                                <span class="text-muted">Approved</span>
                                 {% endif %}
                             </td>
                         </tr>
