@@ -336,6 +336,33 @@ def approve_loan(loan_id):
     flash('Loan approved', 'success')
     return redirect(url_for('admin_loans'))
 
+@app.route('/admin/loans')
+@login_required
+@admin_required
+def admin_loans():
+    loans = Loan.query.order_by(Loan.date_applied.desc()).all()
+    return render_template('admin/loans.html', loans=loans)
+
+@app.route('/admin/loans/<int:loan_id>/approve')
+@login_required
+@admin_required
+def approve_loan(loan_id):
+    loan = Loan.query.get_or_404(loan_id)
+    loan.status = 'Approved'
+    db.session.commit()
+    flash('Loan approved successfully!', 'success')
+    return redirect(url_for('admin_loans'))
+
+@app.route('/admin/loans/<int:loan_id>/reject')
+@login_required
+@admin_required
+def reject_loan(loan_id):
+    loan = Loan.query.get_or_404(loan_id)
+    loan.status = 'Rejected'
+    db.session.commit()
+    flash('Loan rejected!', 'info')
+    return redirect(url_for('admin_loans'))
+
 @app.route('/admin/send-notification', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -573,10 +600,16 @@ def apply_loan():
 @login_required
 def notifications():
     notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.date.desc()).all()
-    for notification in notifications:
-        notification.is_read = True
-    db.session.commit()
     return render_template('notifications/list.html', notifications=notifications)
+
+@app.route('/notifications/<int:notification_id>/read')
+@login_required
+def mark_notification_read(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if notification.user_id == current_user.id:
+        notification.is_read = True
+        db.session.commit()
+    return redirect(url_for('notifications'))
 
 @app.route('/account/profile')
 @login_required
