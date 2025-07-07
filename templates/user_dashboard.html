@@ -21,7 +21,7 @@
         <div class="col-6 col-md-3 mb-3 mb-md-0">
             <div class="card bg-success text-white shadow">
                 <div class="card-body p-3 text-center">
-                    <h4 class="mb-1">${{ "%.2f"|format(total_contributions) }}</h4>
+                    <h4 class="mb-1">KSH {{ "%.0f"|format(total_contributions) }}</h4>
                     <small>Total Contributions</small>
                 </div>
             </div>
@@ -126,7 +126,7 @@
                                     {% for contribution in contributions %}
                                     <tr>
                                         <td>{{ contribution.date.strftime('%b %d') }}</td>
-                                        <td class="text-success fw-bold">${{ contribution.amount }}</td>
+                                        <td class="text-success fw-bold">KSH {{ contribution.amount }}</td>
                                         <td>{{ contribution.description or 'Regular contribution' }}</td>
                                     </tr>
                                     {% endfor %}

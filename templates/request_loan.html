@@ -17,7 +17,7 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="amount" class="form-label">Loan Amount ($)</label>
+                        <label for="amount" class="form-label">Loan Amount (KSH)</label>
                         <input type="number" step="0.01" class="form-control form-control-lg" 
                                id="amount" name="amount" required min="1">
                     </div>
@@ -30,8 +30,7 @@
                     
                     <div class="mb-4">
                         <label for="due_date" class="form-label">Expected Repayment Date</label>
-                        <input type="date" class="form-control" id="due_date" name="due_date" required
-                               min="{{ (moment().add(1, 'month')).format('YYYY-MM-DD') }}">
+                        <input type="date" class="form-control" id="due_date" name="due_date" required>
                     </div>
                     
                     <div class="alert alert-info">

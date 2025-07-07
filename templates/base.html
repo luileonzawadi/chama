@@ -78,6 +78,93 @@
             }
         }
         
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 250px;
+            height: calc(100vh - 56px);
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+        
+        .sidebar-header {
+            padding: 1rem 1.5rem 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-header h6 {
+            color: #6c757d;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .sidebar-nav {
+            padding: 0.5rem 0;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: #495057;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .sidebar-link.active {
+            background-color: #e3f2fd;
+            color: #007bff;
+            border-left-color: #007bff;
+            font-weight: 500;
+        }
+        
+        .sidebar-link i {
+            width: 20px;
+            margin-right: 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        .sidebar-divider {
+            height: 1px;
+            background-color: #dee2e6;
+            margin: 1rem 0;
+        }
+        
+        .main-content {
+            margin-left: 0;
+            padding-top: 20px;
+        }
+        
+        .main-content.with-sidebar {
+            margin-left: 250px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main-content.with-sidebar {
+                margin-left: 0;
+            }
+        }
+        
         /* Touch-friendly elements */
         .btn, .form-control, .form-select {
             min-height: 44px;
@@ -90,25 +177,93 @@
                 width: 100% !important;
                 margin-bottom: 10px;
             }
+            
+            .main-content {
+                padding-top: 20px;
+            }
         }
     </style>
 </head>
 <body>
     {% include 'navbar.html' %}
     
-    <div class="container-fluid px-2 px-md-3">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
+    {% if current_user.is_authenticated %}
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h6><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h6>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('index') }}" class="sidebar-link {% if request.endpoint == 'index' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('contribute') }}" class="sidebar-link">
+                <i class="fas fa-plus-circle"></i>
+                <span>Contribute</span>
+            </a>
+            <a href="{{ url_for('my_contributions') }}" class="sidebar-link">
+                <i class="fas fa-history"></i>
+                <span>My Contributions</span>
+            </a>
+            <a href="{{ url_for('request_loan') }}" class="sidebar-link">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>Request Loan</span>
+            </a>
+            <a href="{{ url_for('loans') }}" class="sidebar-link">
+                <i class="fas fa-list"></i>
+                <span>My Loans</span>
+            </a>
+            <a href="{{ url_for('discussions') }}" class="sidebar-link {% if request.endpoint == 'discussions' %}active{% endif %}">
+                <i class="fas fa-comments"></i>
+                <span>Discussions</span>
+            </a>
+            <a href="{{ url_for('activities') }}" class="sidebar-link">
+                <i class="fas fa-calendar"></i>
+                <span>Activities</span>
+            </a>
+            <a href="{{ url_for('notifications') }}" class="sidebar-link">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+            </a>
+            {% if current_user.is_admin %}
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-header">
+                <h6><i class="fas fa-cog me-2"></i>Admin</h6>
+            </div>
+            <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Admin Dashboard</span>
+            </a>
+            <a href="{{ url_for('admin_members') }}" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>Manage Members</span>
+            </a>
+            <a href="{{ url_for('admin_loans') }}" class="sidebar-link">
+                <i class="fas fa-handshake"></i>
+                <span>Manage Loans</span>
+            </a>
             {% endif %}
-        {% endwith %}
-        
-        {% block content %}{% endblock %}
+        </nav>
+    </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <div class="main-content {% if current_user.is_authenticated %}with-sidebar{% endif %}">
+        <div class="container-fluid px-2 px-md-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
     </div>
     
     <!-- Bootstrap JS Bundle with Popper -->

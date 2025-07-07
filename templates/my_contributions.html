@@ -17,7 +17,7 @@
         <div class="col-6 col-md-4">
             <div class="card bg-success text-white">
                 <div class="card-body text-center">
-                    <h3 class="mb-1">${{ "%.2f"|format(total) }}</h3>
+                    <h3 class="mb-1">KSH {{ "%.0f"|format(total) }}</h3>
                     <small>Total Contributed</small>
                 </div>
             </div>
@@ -33,7 +33,7 @@
         <div class="col-12 col-md-4 mt-3 mt-md-0">
             <div class="card bg-primary text-white">
                 <div class="card-body text-center">
-                    <h3 class="mb-1">${{ "%.2f"|format(total / contributions|length) if contributions else 0 }}</h3>
+                    <h3 class="mb-1">KSH {{ "%.0f"|format(total / contributions|length) if contributions else 0 }}</h3>
                     <small>Average Amount</small>
                 </div>
             </div>
@@ -65,7 +65,7 @@
                                     <small class="text-muted">{{ contribution.date.strftime('%I:%M %p') }}</small>
                                 </td>
                                 <td>
-                                    <span class="fw-bold text-success">${{ "%.2f"|format(contribution.amount) }}</span>
+                                    <span class="fw-bold text-success">KSH {{ "%.0f"|format(contribution.amount) }}</span>
                                 </td>
                                 <td>{{ contribution.description or 'Regular contribution' }}</td>
                                 <td>

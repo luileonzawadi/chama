@@ -25,9 +25,9 @@
                     {% for loan in loans %}
                     <tr>
                         <td>{{ loan.member.name }}</td>
-                        <td>${{ loan.amount }}</td>
+                        <td>KSH {{ loan.amount }}</td>
                         <td>{{ loan.purpose }}</td>
-                        <td>{{ loan.date_applied.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ loan.date_applied.strftime('%Y-%m-%d') if loan.date_applied else 'N/A' }}</td>
                         <td>{{ loan.due_date.strftime('%Y-%m-%d') if loan.due_date else 'N/A' }}</td>
                         <td>
                             {% if loan.status == 'Pending' %}
