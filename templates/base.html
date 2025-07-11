@@ -24,8 +24,8 @@
             }
             
             .card {
-                margin-bottom: 1rem;
-                border-radius: 8px;
+                margin-bottom: 0.75rem;
+                border-radius: 0 !important;
             }
             
             .table-responsive {
@@ -126,6 +126,10 @@
             text-decoration: none;
         }
         
+        .sidebar-link:hover i {
+            color: inherit !important;
+        }
+        
         .sidebar-link.active {
             background-color: #e3f2fd;
             color: #007bff;
@@ -138,6 +142,22 @@
             margin-right: 0.75rem;
             font-size: 0.9rem;
         }
+        
+        /* Sidebar icon colors */
+        .sidebar-link .fa-tachometer-alt { color: #007bff; }
+        .sidebar-link .fa-home { color: #28a745; }
+        .sidebar-link .fa-calendar-plus { color: #17a2b8; }
+        .sidebar-link .fa-plus-circle { color: #ffc107; }
+        .sidebar-link .fa-bell { color: #fd7e14; }
+        .sidebar-link .fa-users { color: #6f42c1; }
+        .sidebar-link .fa-handshake { color: #e83e8c; }
+        .sidebar-link .fa-brain { color: #20c997; }
+        .sidebar-link .fa-history { color: #6c757d; }
+        .sidebar-link .fa-hand-holding-usd { color: #dc3545; }
+        .sidebar-link .fa-list { color: #343a40; }
+        .sidebar-link .fa-comments { color: #007bff; }
+        .sidebar-link .fa-calendar { color: #28a745; }
+        .sidebar-link .fa-shield-alt { color: #dc3545; }
         
         .sidebar-divider {
             height: 1px;
@@ -170,6 +190,69 @@
             min-height: 44px;
         }
         
+        /* Card Styles - Sharp edges, different colors, smaller sizes */
+        .card {
+            border-radius: 0 !important;
+            border: 1px solid #dee2e6;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card:nth-child(1) { border-left: 4px solid #007bff; }
+        .card:nth-child(2) { border-left: 4px solid #28a745; }
+        .card:nth-child(3) { border-left: 4px solid #ffc107; }
+        .card:nth-child(4) { border-left: 4px solid #dc3545; }
+        .card:nth-child(5) { border-left: 4px solid #6f42c1; }
+        .card:nth-child(6) { border-left: 4px solid #fd7e14; }
+        .card:nth-child(7) { border-left: 4px solid #20c997; }
+        .card:nth-child(8) { border-left: 4px solid #e83e8c; }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .card-header {
+            padding: 0.75rem 1rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+        
+        .card-header:nth-child(1) { background-color: rgba(0,123,255,0.1); }
+        .card:nth-child(2) .card-header { background-color: rgba(40,167,69,0.1); }
+        .card:nth-child(3) .card-header { background-color: rgba(255,193,7,0.1); }
+        .card:nth-child(4) .card-header { background-color: rgba(220,53,69,0.1); }
+        .card:nth-child(5) .card-header { background-color: rgba(111,66,193,0.1); }
+        .card:nth-child(6) .card-header { background-color: rgba(253,126,20,0.1); }
+        .card:nth-child(7) .card-header { background-color: rgba(32,201,151,0.1); }
+        .card:nth-child(8) .card-header { background-color: rgba(232,62,140,0.1); }
+        
+        /* Smaller card sizes */
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-text {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Stats cards - compact */
+        .stats-card {
+            padding: 0.75rem;
+        }
+        
+        .stats-card h3, .stats-card h4, .stats-card h5 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stats-card p {
+            font-size: 0.85rem;
+            margin-bottom: 0;
+        }
+        
         /* Better mobile tables */
         @media (max-width: 768px) {
             .mobile-stack {
@@ -190,6 +273,43 @@
     {% if current_user.is_authenticated %}
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
+        {% if current_user.is_admin %}
+        <!-- Admin Sidebar -->
+        <div class="sidebar-header">
+            <h6><i class="fas fa-shield-alt me-2"></i>Admin Panel</h6>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('add_activity') }}" class="sidebar-link">
+                <i class="fas fa-calendar-plus"></i>
+                <span>Add Activity</span>
+            </a>
+            <a href="{{ url_for('create_discussion') }}" class="sidebar-link">
+                <i class="fas fa-plus-circle"></i>
+                <span>Create Discussion</span>
+            </a>
+            <a href="{{ url_for('send_notification') }}" class="sidebar-link">
+                <i class="fas fa-bell"></i>
+                <span>Send Notification</span>
+            </a>
+            <a href="{{ url_for('admin_members') }}" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>Manage Members</span>
+            </a>
+            <a href="{{ url_for('admin_loan_requests') }}" class="sidebar-link">
+                <i class="fas fa-handshake"></i>
+                <span>Manage Loans</span>
+            </a>
+            <a href="{{ url_for('admin_ai_insights') }}" class="sidebar-link">
+                <i class="fas fa-brain"></i>
+                <span>AI Insights</span>
+            </a>
+        </nav>
+        {% else %}
+        <!-- User Sidebar -->
         <div class="sidebar-header">
             <h6><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h6>
         </div>
@@ -226,25 +346,8 @@
                 <i class="fas fa-bell"></i>
                 <span>Notifications</span>
             </a>
-            {% if current_user.is_admin %}
-            <div class="sidebar-divider"></div>
-            <div class="sidebar-header">
-                <h6><i class="fas fa-cog me-2"></i>Admin</h6>
-            </div>
-            <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Admin Dashboard</span>
-            </a>
-            <a href="{{ url_for('admin_members') }}" class="sidebar-link">
-                <i class="fas fa-users"></i>
-                <span>Manage Members</span>
-            </a>
-            <a href="{{ url_for('admin_loan_requests') }}" class="sidebar-link">
-                <i class="fas fa-handshake"></i>
-                <span>Manage Loans</span>
-            </a>
-            {% endif %}
         </nav>
+        {% endif %}
     </div>
     {% endif %}
     
@@ -268,5 +371,18 @@
     
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    // Auto-dismiss flash messages after 30 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 30000); // 30 seconds
+        });
+    });
+    </script>
 </body>
 </html>

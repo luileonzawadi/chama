@@ -1,179 +1,185 @@
 {% extends "base.html" %}
 
-{% block title %}AI Insights{% endblock %}
-
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-brain me-2"></i>AI Insights & Recommendations</h2>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">
+        <h2><i class="fas fa-brain me-2"></i>AI Insights & Risk Analysis</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
         </a>
     </div>
 
-    <div class="row">
-        <!-- AI Recommendations -->
-        <div class="col-md-6">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Smart Recommendations</h5>
-                </div>
-                <div class="card-body">
-                    {% for recommendation in recommendations %}
-                    <div class="alert alert-{{ 'warning' if recommendation.type == 'warning' else 'info' }} mb-3">
-                        <div class="d-flex align-items-start">
-                            <i class="fas fa-{{ 'exclamation-triangle' if recommendation.type == 'warning' else 'info-circle' }} me-3 mt-1"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="alert-heading">{{ recommendation.title }}</h6>
-                                <p class="mb-2">{{ recommendation.message }}</p>
-                                <button class="btn btn-sm btn-outline-{{ 'warning' if recommendation.type == 'warning' else 'info' }}">
-                                    {{ recommendation.action }}
-                                </button>
-                            </div>
-                        </div>
+    <!-- Risk Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <div class="text-danger mb-2">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
                     </div>
-                    {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                        <h5>All Good!</h5>
-                        <p class="text-muted">No immediate actions required based on current data.</p>
-                    </div>
-                    {% endfor %}
+                    <h3 class="text-danger">{{ risk_analysis.summary.high_risk }}</h3>
+                    <p class="card-text">High Risk Members</p>
                 </div>
             </div>
         </div>
-
-        <!-- Risk Trends -->
-        <div class="col-md-6">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Risk Distribution</h5>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-exclamation-circle fa-2x"></i>
+                    </div>
+                    <h3 class="text-warning">{{ risk_analysis.summary.medium_risk }}</h3>
+                    <p class="card-text">Medium Risk Members</p>
                 </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div class="risk-circle high-risk">
-                                <span class="risk-number">{{ risk_analysis.summary.high_risk }}</span>
-                            </div>
-                            <p class="mt-2 mb-0"><small>High Risk</small></p>
-                        </div>
-                        <div class="col-4">
-                            <div class="risk-circle medium-risk">
-                                <span class="risk-number">{{ risk_analysis.summary.medium_risk }}</span>
-                            </div>
-                            <p class="mt-2 mb-0"><small>Medium Risk</small></p>
-                        </div>
-                        <div class="col-4">
-                            <div class="risk-circle low-risk">
-                                <span class="risk-number">{{ risk_analysis.summary.low_risk }}</span>
-                            </div>
-                            <p class="mt-2 mb-0"><small>Low Risk</small></p>
-                        </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-check-circle fa-2x"></i>
                     </div>
-                    
-                    <hr>
-                    
-                    <div class="insight-metrics">
-                        <div class="metric-item">
-                            <i class="fas fa-percentage text-primary me-2"></i>
-                            <span>Default Risk Rate: 
-                                <strong>{{ "%.1f"|format((risk_analysis.summary.high_risk / risk_analysis.summary.total_analyzed * 100) if risk_analysis.summary.total_analyzed > 0 else 0) }}%</strong>
-                            </span>
-                        </div>
-                        <div class="metric-item">
-                            <i class="fas fa-shield-alt text-success me-2"></i>
-                            <span>Safe Members: 
-                                <strong>{{ "%.1f"|format((risk_analysis.summary.low_risk / risk_analysis.summary.total_analyzed * 100) if risk_analysis.summary.total_analyzed > 0 else 0) }}%</strong>
-                            </span>
-                        </div>
+                    <h3 class="text-success">{{ risk_analysis.summary.low_risk }}</h3>
+                    <p class="card-text">Low Risk Members</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-users fa-2x"></i>
                     </div>
+                    <h3 class="text-info">{{ risk_analysis.summary.total_analyzed }}</h3>
+                    <p class="card-text">Total Analyzed</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Top Risk Members -->
-    <div class="card shadow">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Members Requiring Attention</h5>
+    <div class="row">
+        <!-- Risk Predictions Table -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Member Risk Assessment</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Risk Level</th>
+                                    <th>Risk Score</th>
+                                    <th>Contributions</th>
+                                    <th>Key Factors</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prediction in risk_analysis.predictions %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ prediction.member.name }}</strong><br>
+                                        <small class="text-muted">{{ prediction.member.phone }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ prediction.risk_color }}">
+                                            {{ prediction.risk_level }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="width: 80px;">
+                                            <div class="progress-bar bg-{{ prediction.risk_color }}" 
+                                                 style="width: {{ prediction.risk_score }}%">
+                                                {{ prediction.risk_score }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>KSH {{ "%.0f"|format(prediction.total_contributions) }}</strong><br>
+                                        <small class="text-muted">{{ prediction.loan_count }} loans</small>
+                                    </td>
+                                    <td>
+                                        {% for factor in prediction.risk_factors[:2] %}
+                                            <span class="badge bg-light text-dark me-1">{{ factor }}</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            {% set high_risk_members = risk_analysis.predictions | selectattr("risk_level", "equalto", "High") | list %}
-            {% if high_risk_members %}
-                <div class="row">
-                    {% for member in high_risk_members[:6] %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-danger">
-                            <div class="card-body">
-                                <h6 class="card-title">{{ member.member.name }}</h6>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-danger">{{ member.risk_score }}% Risk</span>
-                                    <small class="text-muted">{{ member.member.phone }}</small>
-                                </div>
-                                <div class="risk-factors">
-                                    {% for factor in member.risk_factors[:2] %}
-                                        <span class="badge bg-light text-dark me-1">{{ factor }}</span>
-                                    {% endfor %}
-                                </div>
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-danger w-100">
-                                        <i class="fas fa-eye me-1"></i>Review Member
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+
+        <!-- AI Recommendations -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-lightbulb me-2"></i>AI Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    {% for recommendation in recommendations %}
+                    <div class="alert alert-{{ recommendation.type }} alert-sm mb-3">
+                        <h6 class="alert-heading">{{ recommendation.title }}</h6>
+                        <p class="mb-0 small">{{ recommendation.message }}</p>
                     </div>
                     {% endfor %}
                 </div>
-            {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-thumbs-up fa-3x text-success mb-3"></i>
-                    <h5>Excellent!</h5>
-                    <p class="text-muted">No high-risk members detected. Your chama is performing well!</p>
+            </div>
+
+            <!-- Risk Factors Legend -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6><i class="fas fa-info-circle me-2"></i>Risk Factors</h6>
                 </div>
-            {% endif %}
+                <div class="card-body">
+                    <div class="small">
+                        <div class="mb-2">
+                            <span class="badge bg-danger me-2">High</span>
+                            <span>Score ≥ 60%</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="badge bg-warning me-2">Medium</span>
+                            <span>Score 30-59%</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="badge bg-success me-2">Low</span>
+                            <span>Score < 30%</span>
+                        </div>
+                        <hr>
+                        <p class="mb-1"><strong>Factors considered:</strong></p>
+                        <ul class="mb-0">
+                            <li>Contribution history</li>
+                            <li>Loan repayment record</li>
+                            <li>Member activity level</li>
+                            <li>Account tenure</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-.risk-circle {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    font-weight: bold;
-    color: white;
+.alert-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
 }
 
-.high-risk {
-    background: linear-gradient(135deg, #dc3545, #c82333);
+.progress {
+    height: 20px;
 }
 
-.medium-risk {
-    background: linear-gradient(135deg, #ffc107, #e0a800);
+.card {
+    border-radius: 10px;
 }
 
-.low-risk {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-}
-
-.risk-number {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.metric-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.risk-factors .badge {
-    font-size: 0.7rem;
+.badge {
+    font-size: 0.75rem;
 }
 </style>
 {% endblock %}

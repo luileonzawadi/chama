@@ -8,6 +8,9 @@ import string
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from functools import wraps
+import requests
+import base64
+import json
 
 # Load environment variables
 load_dotenv()
@@ -102,7 +105,7 @@ class Activity(db.Model):
 # User loader for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 # Admin required decorator
 def admin_required(f):
@@ -112,6 +115,92 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorated_function
+
+# AI Risk Analysis Function
+def calculate_risk_analysis():
+    members = Member.query.all()
+    predictions = []
+    high_risk = medium_risk = low_risk = 0
+    
+    for member in members:
+        # Calculate member metrics
+        total_contributions = sum(c.amount for c in member.contributions)
+        contribution_count = len(member.contributions)
+        loan_count = len(member.loans)
+        pending_loans = len([l for l in member.loans if l.status == 'Pending'])
+        rejected_loans = len([l for l in member.loans if l.status == 'Rejected'])
+        
+        # Calculate risk score (0-100)
+        risk_score = 0
+        risk_factors = []
+        
+        # Contribution history analysis
+        if total_contributions < 5000:
+            risk_score += 30
+            risk_factors.append('Low contribution history')
+        elif total_contributions < 15000:
+            risk_score += 15
+            risk_factors.append('Moderate contributions')
+        
+        # Loan history analysis
+        if rejected_loans > 0:
+            risk_score += 25
+            risk_factors.append('Previous loan rejections')
+        
+        if pending_loans > 1:
+            risk_score += 20
+            risk_factors.append('Multiple pending loans')
+        
+        # Activity analysis
+        if contribution_count < 3:
+            risk_score += 20
+            risk_factors.append('Low activity')
+        
+        # Member tenure
+        days_since_join = (datetime.utcnow() - member.join_date).days
+        if days_since_join < 30:
+            risk_score += 15
+            risk_factors.append('New member')
+        
+        # Determine risk level and color
+        if risk_score >= 60:
+            risk_level = 'High Risk'
+            risk_color = 'danger'
+            high_risk += 1
+        elif risk_score >= 30:
+            risk_level = 'Medium Risk'
+            risk_color = 'warning'
+            medium_risk += 1
+        else:
+            risk_level = 'Low Risk'
+            risk_color = 'success'
+            low_risk += 1
+        
+        if not risk_factors:
+            risk_factors = ['Good standing']
+        
+        predictions.append({
+            'member': member,
+            'risk_score': min(risk_score, 100),
+            'risk_level': risk_level,
+            'risk_color': risk_color,
+            'risk_factors': risk_factors,
+            'total_contributions': total_contributions,
+            'loan_count': loan_count
+        })
+    
+    # Sort by risk score (highest first)
+    predictions.sort(key=lambda x: x['risk_score'], reverse=True)
+    
+    return {
+        'summary': {
+            'high_risk': high_risk,
+            'medium_risk': medium_risk,
+            'low_risk': low_risk,
+            'total_analyzed': len(members)
+        },
+        'predictions': predictions
+    }
 
 # Routes
 @app.route('/')
@@ -165,6 +254,49 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+# M-Pesa STK Push function
+def initiate_stk_push(phone, amount, account_ref):
+    try:
+        # Get access token
+        consumer_key = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
+        consumer_secret = 'b051e7d22f7e0fe81e71b1d1a0e8b9c2d5c0b1f8e6a9c8d7f4e3b2a1c9d8e7f6'
+        
+        api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+        r = requests.get(api_url, auth=(consumer_key, consumer_secret))
+        access_token = r.json()['access_token']
+        
+        # STK Push request
+        api_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        shortcode = '174379'
+        passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919b051e7d22f7e0fe81e71b1d1a0e8b9c2d5c0b1f8e6a9c8d7f4e3b2a1c9d8e7f6'
+        
+        password = base64.b64encode((shortcode + passkey + timestamp).encode()).decode('utf-8')
+        
+        payload = {
+            'BusinessShortCode': shortcode,
+            'Password': password,
+            'Timestamp': timestamp,
+            'TransactionType': 'CustomerPayBillOnline',
+            'Amount': int(amount),
+            'PartyA': phone,
+            'PartyB': shortcode,
+            'PhoneNumber': phone,
+            'CallBackURL': 'https://mydomain.com/path',
+            'AccountReference': account_ref,
+            'TransactionDesc': 'Chama Contribution'
+        }
+        
+        response = requests.post(api_url, json=payload, headers=headers)
+        return response.json()
+    except:
+        return {'ResponseCode': '1', 'errorMessage': 'Service unavailable'}
+
 @app.route('/contribute', methods=['GET', 'POST'])
 @login_required
 def contribute():
@@ -175,12 +307,17 @@ def contribute():
     
     if request.method == 'POST':
         amount = request.form.get('amount')
+        phone = request.form.get('phone')
         description = request.form.get('description', '')
         
-        contribution = Contribution(amount=float(amount), member_id=member.id, description=description)
-        db.session.add(contribution)
-        db.session.commit()
-        flash('Contribution added successfully!', 'success')
+        # Initiate M-Pesa STK Push
+        mpesa_response = initiate_stk_push(phone, amount, f'CONTRIB-{member.id}')
+        
+        if mpesa_response.get('ResponseCode') == '0':
+            flash('Payment request sent to your phone. Please complete the payment.', 'info')
+        else:
+            flash('Payment request failed. Please try again.', 'danger')
+        
         return redirect(url_for('index'))
     
     return render_template('contribute.html', member=member)
@@ -317,7 +454,11 @@ def admin_dashboard():
         'contributions': Contribution.query.count(),
         'loans': Loan.query.count()
     }
-    return render_template('admin/dashboard.html', stats=stats)
+    
+    # AI Risk Analysis
+    risk_analysis = calculate_risk_analysis()
+    
+    return render_template('admin/dashboard.html', stats=stats, risk_analysis=risk_analysis)
 
 @app.route('/admin/members')
 @login_required
@@ -364,16 +505,30 @@ def reject_loan(loan_id):
 @login_required
 @admin_required
 def admin_ai_insights():
-    risk_analysis = {
-        'summary': {
-            'high_risk': 0,
-            'medium_risk': 0,
-            'low_risk': User.query.count(),
-            'total_analyzed': User.query.count()
-        },
-        'predictions': []
-    }
+    risk_analysis = calculate_risk_analysis()
+    
+    # Generate AI recommendations
     recommendations = []
+    if risk_analysis['summary']['high_risk'] > 0:
+        recommendations.append({
+            'type': 'warning',
+            'title': 'High Risk Members Detected',
+            'message': f"{risk_analysis['summary']['high_risk']} members have high default risk. Review their loan applications carefully."
+        })
+    
+    if risk_analysis['summary']['medium_risk'] > risk_analysis['summary']['low_risk']:
+        recommendations.append({
+            'type': 'info',
+            'title': 'Encourage More Contributions',
+            'message': 'Many members have medium risk due to low contribution history. Consider incentive programs.'
+        })
+    
+    recommendations.append({
+        'type': 'success',
+        'title': 'Regular Monitoring',
+        'message': 'Continue monitoring member activities and update risk assessments monthly.'
+    })
+    
     return render_template('admin/ai_insights.html', 
                          risk_analysis=risk_analysis, 
                          recommendations=recommendations)
@@ -382,15 +537,7 @@ def admin_ai_insights():
 @login_required
 @admin_required
 def admin_risk_analysis():
-    risk_analysis = {
-        'summary': {
-            'high_risk': 0,
-            'medium_risk': 0,
-            'low_risk': User.query.count(),
-            'total_analyzed': User.query.count()
-        },
-        'predictions': []
-    }
+    risk_analysis = calculate_risk_analysis()
     return render_template('admin/risk_analysis.html', risk_analysis=risk_analysis)
 
 @app.route('/add-member', methods=['GET', 'POST'])
@@ -447,6 +594,44 @@ def send_notification():
     
     users = User.query.filter_by(is_admin=False).all()
     return render_template('admin/send_notification.html', users=users)
+
+@app.route('/add-activity', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_activity():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        date = datetime.strptime(request.form.get('date'), '%Y-%m-%dT%H:%M')
+        activity_type = request.form.get('type')
+        
+        activity = Activity(
+            title=title,
+            description=description,
+            date=date,
+            type=activity_type,
+            created_by=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        flash('Activity added successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('admin/add_activity.html')
+
+@app.route('/admin/remove-member/<int:member_id>')
+@login_required
+@admin_required
+def remove_member(member_id):
+    member = Member.query.get_or_404(member_id)
+    member_name = member.name
+    
+    # Only delete member profile, keep user account
+    db.session.delete(member)
+    db.session.commit()
+    
+    flash(f'Member {member_name} removed from chama (user account preserved)!', 'success')
+    return redirect(url_for('admin_members'))
 
 @app.route('/admin/reset-password/<int:user_id>')
 @login_required

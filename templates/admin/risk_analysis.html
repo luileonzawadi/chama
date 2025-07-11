@@ -90,7 +90,7 @@
                                 </div>
                             </td>
                             <td>${{ "%.2f"|format(prediction.total_contributions) }}</td>
-                            <td>${{ "%.2f"|format(prediction.total_loans) }}</td>
+                            <td>{{ prediction.loan_count }} loans</td>
                             <td>
                                 <span class="badge bg-info">{{ prediction.active_loans_count }}</span>
                             </td>
