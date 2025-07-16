@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-file-contract me-2"></i>Create Smart Contract</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Contract Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="type" class="form-label">Contract Type</label>
+                                    <select class="form-select" id="type" name="type" required>
+                                        <option value="">Select Type</option>
+                                        <option value="loan">Loan Automation</option>
+                                        <option value="investment">Investment Rules</option>
+                                        <option value="savings">Savings Goals</option>
+                                        <option value="expense">Expense Approval</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="amount" class="form-label">Contract Amount (KSH)</label>
+                                    <input type="number" class="form-control" id="amount" name="amount" 
+                                           step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contract Conditions -->
+                        <div class="mb-3">
+                            <label class="form-label">Contract Conditions</label>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="auto_approve_limit" class="form-label">Auto Approve Limit (KSH)</label>
+                                        <input type="number" class="form-control" id="auto_approve_limit" 
+                                               name="auto_approve_limit" step="0.01" value="10000">
+                                        <small class="text-muted">Loans below this amount are auto-approved</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="contribution_multiplier" class="form-label">Contribution Multiplier</label>
+                                        <input type="number" class="form-control" id="contribution_multiplier" 
+                                               name="contribution_multiplier" step="0.1" value="2">
+                                        <small class="text-muted">Member must have contributed X times loan amount</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="max_loan_term" class="form-label">Maximum Loan Term (Days)</label>
+                                <input type="number" class="form-control" id="max_loan_term" 
+                                       name="max_loan_term" value="90">
+                                <small class="text-muted">Maximum repayment period</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Contract Preview -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Smart Contract Preview</h6>
+                            <div id="contractPreview">
+                                <p><strong>IF</strong> loan amount ≤ <span id="previewLimit">10000</span> KSH</p>
+                                <p><strong>AND</strong> member contributions ≥ <span id="previewMultiplier">2</span>x loan amount</p>
+                                <p><strong>AND</strong> loan term ≤ <span id="previewTerm">90</span> days</p>
+                                <p><strong>THEN</strong> automatically approve loan</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{{ url_for('smart_contracts') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Create Contract
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update contract preview in real-time
+function updatePreview() {
+    const limit = document.getElementById('auto_approve_limit').value || '10000';
+    const multiplier = document.getElementById('contribution_multiplier').value || '2';
+    const term = document.getElementById('max_loan_term').value || '90';
+    
+    document.getElementById('previewLimit').textContent = limit;
+    document.getElementById('previewMultiplier').textContent = multiplier;
+    document.getElementById('previewTerm').textContent = term;
+}
+
+// Add event listeners
+document.getElementById('auto_approve_limit').addEventListener('input', updatePreview);
+document.getElementById('contribution_multiplier').addEventListener('input', updatePreview);
+document.getElementById('max_loan_term').addEventListener('input', updatePreview);
+</script>
+{% endblock %}

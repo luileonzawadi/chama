@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-contract me-2"></i>Smart Contracts</h2>
+        <a href="{{ url_for('create_smart_contract') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Create Contract
+        </a>
+    </div>
+
+    {% if contracts %}
+    <div class="row">
+        {% for contract in contracts %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ contract.contract_name }}</h5>
+                    <span class="badge bg-{{ 'success' if contract.status == 'Active' else 'secondary' }}">
+                        {{ contract.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Type:</strong> 
+                        <span class="badge bg-primary">{{ contract.contract_type.title() }}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Amount:</strong> KSH {{ "%.2f"|format(contract.amount) if contract.amount else 'N/A' }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Auto Execute:</strong>
+                        <span class="badge bg-{{ 'success' if contract.auto_execute else 'warning' }}">
+                            {{ 'Yes' if contract.auto_execute else 'No' }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Created:</strong> {{ contract.created_date.strftime('%Y-%m-%d') }}
+                    </div>
+                    
+                    {% if contract.executed_date %}
+                    <div class="mb-3">
+                        <strong>Last Executed:</strong> {{ contract.executed_date.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Contract Conditions -->
+                    <div class="mt-3">
+                        <strong>Conditions:</strong>
+                        <div class="bg-light p-2 rounded mt-1">
+                            <small class="font-monospace">{{ contract.conditions }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-sm btn-info" onclick="executeContract({{ contract.id }})">
+                        <i class="fas fa-play me-1"></i>Execute
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="pauseContract({{ contract.id }})">
+                        <i class="fas fa-pause me-1"></i>Pause
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
+            <h5>No Smart Contracts</h5>
+            <p class="text-muted">Create your first automated smart contract</p>
+            <a href="{{ url_for('create_smart_contract') }}" class="btn btn-primary">Create Contract</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function executeContract(contractId) {
+    if (confirm('Execute this smart contract now?')) {
+        alert('Smart contract executed! (Demo mode)');
+    }
+}
+
+function pauseContract(contractId) {
+    if (confirm('Pause this smart contract?')) {
+        alert('Smart contract paused! (Demo mode)');
+    }
+}
+</script>
+{% endblock %}

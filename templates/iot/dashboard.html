@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-microchip me-2"></i>IoT Device Dashboard</h2>
+        <button class="btn btn-success" onclick="refreshDevices()">
+            <i class="fas fa-sync me-1"></i>Refresh All
+        </button>
+    </div>
+
+    <!-- Device Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>{{ devices|length }}</h4>
+                    <small>Total Devices</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>{{ devices|selectattr('status', 'equalto', 'Active')|list|length }}</h4>
+                    <small>Active Devices</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body stats-card text-center">
+                    <h4>{{ devices|selectattr('device_type', 'equalto', 'sensor')|list|length }}</h4>
+                    <small>Sensors</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>{{ devices|selectattr('device_type', 'equalto', 'camera')|list|length }}</h4>
+                    <small>Cameras</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Grid -->
+    {% if devices %}
+    <div class="row">
+        {% for device in devices %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card device-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-{{ 'video' if device.device_type == 'camera' else 'thermometer-half' if device.device_type == 'sensor' else 'wifi' }} me-2"></i>
+                        <strong>{{ device.device_name }}</strong>
+                    </div>
+                    <span class="badge bg-{{ 'success' if device.status == 'Active' else 'danger' }}">
+                        {{ device.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Device ID:</strong> <code>{{ device.device_id }}</code>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Type:</strong> {{ device.device_type.title() }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Location:</strong> {{ device.location or 'Not specified' }}
+                    </div>
+                    
+                    {% if device.battery_level %}
+                    <div class="mb-2">
+                        <strong>Battery:</strong>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-{{ 'success' if device.battery_level > 50 else 'warning' if device.battery_level > 20 else 'danger' }}" 
+                                 style="width: {{ device.battery_level }}%"></div>
+                        </div>
+                        <small>{{ device.battery_level }}%</small>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-2">
+                        <strong>Last Ping:</strong> 
+                        {{ device.last_ping.strftime('%Y-%m-%d %H:%M') if device.last_ping else 'Never' }}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-sm btn-primary" onclick="viewDevice('{{ device.device_id }}')">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                    <button class="btn btn-sm btn-info" onclick="configDevice('{{ device.device_id }}')">
+                        <i class="fas fa-cog me-1"></i>Config
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-microchip fa-3x text-muted mb-3"></i>
+            <h5>No IoT Devices</h5>
+            <p class="text-muted">Connect your first IoT device to get started</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.device-card {
+    transition: transform 0.2s ease;
+}
+
+.device-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+</style>
+
+<script>
+function refreshDevices() {
+    alert('Refreshing all IoT devices...\n\nThis would ping all devices and update their status.');
+    window.location.reload();
+}
+
+function viewDevice(deviceId) {
+    alert('Viewing device: ' + deviceId + '\n\nThis would show detailed device information and live data.');
+}
+
+function configDevice(deviceId) {
+    alert('Configuring device: ' + deviceId + '\n\nThis would open device configuration panel.');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-vr-cardboard me-2"></i>VR Meetings</h2>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('create_vr_meeting') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Schedule VR Meeting
+        </a>
+        {% endif %}
+    </div>
+
+    {% if sessions %}
+    <div class="row">
+        {% for session in sessions %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ session.session_name }}</h5>
+                    <span class="badge bg-{{ 'success' if session.status == 'Active' else 'primary' if session.status == 'Scheduled' else 'secondary' }}">
+                        {{ session.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Type:</strong> {{ session.session_type.title() }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>VR Room ID:</strong> 
+                        <code>{{ session.vr_room_id }}</code>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Start Time:</strong> {{ session.start_time.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                    {% if session.end_time %}
+                    <div class="mb-3">
+                        <strong>End Time:</strong> {{ session.end_time.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-success btn-sm" onclick="joinVR('{{ session.vr_room_id }}')">
+                        <i class="fas fa-vr-cardboard me-1"></i>Join VR
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-vr-cardboard fa-3x text-muted mb-3"></i>
+            <h5>No VR Meetings</h5>
+            <p class="text-muted">Schedule your first virtual reality meeting</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function joinVR(roomId) {
+    alert('Joining VR Room: ' + roomId + '\n\nThis would launch VR application or web VR interface.');
+}
+</script>
+{% endblock %}

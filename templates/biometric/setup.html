@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-fingerprint me-2"></i>Biometric Security Setup</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Current Biometrics -->
+                    {% if biometrics %}
+                    <div class="mb-4">
+                        <h5>Active Biometric Methods</h5>
+                        {% for bio in biometrics %}
+                        <div class="d-flex justify-content-between align-items-center p-3 border rounded mb-2">
+                            <div>
+                                <i class="fas fa-{{ 'fingerprint' if bio.biometric_type == 'fingerprint' else 'user-circle' if bio.biometric_type == 'face' else 'microphone' }} me-2"></i>
+                                <strong>{{ bio.biometric_type.title() }} Authentication</strong>
+                                <br><small class="text-muted">Added: {{ bio.created_date.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Add New Biometric -->
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-fingerprint fa-3x text-primary mb-3"></i>
+                                    <h6>Fingerprint</h6>
+                                    <p class="small text-muted">Secure fingerprint authentication</p>
+                                    <button class="btn btn-primary btn-sm" onclick="setupFingerprint()">
+                                        Setup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-user-circle fa-3x text-success mb-3"></i>
+                                    <h6>Face Recognition</h6>
+                                    <p class="small text-muted">AI-powered face authentication</p>
+                                    <button class="btn btn-success btn-sm" onclick="setupFace()">
+                                        Setup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-microphone fa-3x text-info mb-3"></i>
+                                    <h6>Voice Recognition</h6>
+                                    <p class="small text-muted">Voice pattern authentication</p>
+                                    <button class="btn btn-info btn-sm" onclick="setupVoice()">
+                                        Setup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Info -->
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <strong>Security Notice:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Biometric data is encrypted and stored securely</li>
+                            <li>Multiple authentication methods increase security</li>
+                            <li>You can disable biometrics anytime</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setupFingerprint() {
+    alert('Fingerprint setup would integrate with device biometric APIs.\n\nThis is a demo - in production, this would:\n1. Access device fingerprint scanner\n2. Capture and encrypt fingerprint data\n3. Store securely in database');
+}
+
+function setupFace() {
+    alert('Face recognition setup would use camera and AI.\n\nThis is a demo - in production, this would:\n1. Access device camera\n2. Capture facial features using AI\n3. Create encrypted face template');
+}
+
+function setupVoice() {
+    alert('Voice recognition setup would use microphone.\n\nThis is a demo - in production, this would:\n1. Record voice samples\n2. Extract voice patterns\n3. Create voice authentication model');
+}
+</script>
+{% endblock %}

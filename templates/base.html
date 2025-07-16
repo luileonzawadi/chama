@@ -163,6 +163,14 @@
         .sidebar-link .fa-bullseye { color: #dc3545; }
         .sidebar-link .fa-video { color: #6f42c1; }
         .sidebar-link .fa-file-alt { color: #17a2b8; }
+        .sidebar-link .fa-link { color: #6f42c1; }
+        .sidebar-link .fa-robot { color: #e83e8c; }
+        .sidebar-link .fa-file-contract { color: #fd7e14; }
+        .sidebar-link .fa-microchip { color: #20c997; }
+        .sidebar-link .fa-vr-cardboard { color: #dc3545; }
+        .sidebar-link .fa-wallet { color: #ffc107; }
+        .sidebar-link .fa-fingerprint { color: #28a745; }
+        .sidebar-link .fa-rocket { color: #007bff; }
         
         .sidebar-divider {
             height: 1px;
@@ -332,6 +340,30 @@
                 <i class="fas fa-file-alt"></i>
                 <span>Reports</span>
             </a>
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-header">
+                <h6><i class="fas fa-rocket me-2"></i>Modern Tech</h6>
+            </div>
+            <a href="{{ url_for('blockchain_explorer') }}" class="sidebar-link">
+                <i class="fas fa-link"></i>
+                <span>Blockchain</span>
+            </a>
+            <a href="{{ url_for('ai_insights') }}" class="sidebar-link">
+                <i class="fas fa-robot"></i>
+                <span>AI Insights</span>
+            </a>
+            <a href="{{ url_for('smart_contracts') }}" class="sidebar-link">
+                <i class="fas fa-file-contract"></i>
+                <span>Smart Contracts</span>
+            </a>
+            <a href="{{ url_for('iot_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-microchip"></i>
+                <span>IoT Dashboard</span>
+            </a>
+            <a href="{{ url_for('vr_meetings') }}" class="sidebar-link">
+                <i class="fas fa-vr-cardboard"></i>
+                <span>VR Meetings</span>
+            </a>
         </nav>
         {% else %}
         <!-- User Sidebar -->
@@ -386,6 +418,26 @@
             <a href="{{ url_for('meetings') }}" class="sidebar-link">
                 <i class="fas fa-video"></i>
                 <span>Meetings</span>
+            </a>
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-header">
+                <h6><i class="fas fa-rocket me-2"></i>Tech Features</h6>
+            </div>
+            <a href="{{ url_for('crypto_wallet') }}" class="sidebar-link">
+                <i class="fas fa-wallet"></i>
+                <span>Crypto Wallet</span>
+            </a>
+            <a href="{{ url_for('ai_insights') }}" class="sidebar-link">
+                <i class="fas fa-robot"></i>
+                <span>AI Insights</span>
+            </a>
+            <a href="{{ url_for('vr_meetings') }}" class="sidebar-link">
+                <i class="fas fa-vr-cardboard"></i>
+                <span>VR Meetings</span>
+            </a>
+            <a href="{{ url_for('biometric_setup') }}" class="sidebar-link">
+                <i class="fas fa-fingerprint"></i>
+                <span>Biometric</span>
             </a>
         </nav>
         {% endif %}

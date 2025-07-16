@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-link me-2"></i>Blockchain Explorer</h2>
+        <div>
+            <button class="btn btn-success" onclick="verifyBlockchain()">
+                <i class="fas fa-shield-alt me-1"></i>Verify Chain
+            </button>
+        </div>
+    </div>
+
+    <!-- Blockchain Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>{{ blocks|length }}</h4>
+                    <small>Total Blocks</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>{{ blocks|selectattr('transaction_type', 'equalto', 'contribution')|list|length }}</h4>
+                    <small>Contribution Blocks</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body stats-card text-center">
+                    <h4>{{ blocks|selectattr('transaction_type', 'equalto', 'loan')|list|length }}</h4>
+                    <small>Loan Blocks</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body stats-card text-center">
+                    <h4 id="chainStatus">Valid</h4>
+                    <small>Chain Status</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blockchain Blocks -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Recent Blocks</h5>
+        </div>
+        <div class="card-body">
+            {% if blocks %}
+            <div class="blockchain-container">
+                {% for block in blocks %}
+                <div class="block-card mb-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <span><strong>Block #{{ block.id }}</strong></span>
+                            <span class="badge bg-{{ 'success' if block.transaction_type == 'contribution' else 'warning' if block.transaction_type == 'loan' else 'info' }}">
+                                {{ block.transaction_type.title() }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Block Hash:</small>
+                                    <div class="font-monospace small">{{ block.block_hash[:32] }}...</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">Previous Hash:</small>
+                                    <div class="font-monospace small">{{ block.previous_hash[:32] if block.previous_hash else 'Genesis Block' }}...</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-4">
+                                    <small class="text-muted">Timestamp:</small>
+                                    <div>{{ block.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">Amount:</small>
+                                    <div>KSH {{ "%.2f"|format(block.amount) if block.amount else 'N/A' }}</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">Nonce:</small>
+                                    <div>{{ block.nonce }}</div>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">Transaction Data:</small>
+                                <div class="bg-light p-2 rounded font-monospace small">
+                                    {{ block.transaction_data[:100] }}...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-link fa-3x text-muted mb-3"></i>
+                <h5>No Blocks Yet</h5>
+                <p class="text-muted">Blockchain will be populated as transactions occur</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.blockchain-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.block-card {
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.block-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+}
+</style>
+
+<script>
+async function verifyBlockchain() {
+    try {
+        const response = await fetch('/api/blockchain/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const result = await response.json();
+        const statusElement = document.getElementById('chainStatus');
+        
+        if (result.valid) {
+            statusElement.textContent = 'Valid';
+            statusElement.className = 'text-success';
+            alert('✅ Blockchain is valid and secure!');
+        } else {
+            statusElement.textContent = 'Invalid';
+            statusElement.className = 'text-danger';
+            alert('❌ Blockchain integrity compromised: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error verifying blockchain: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

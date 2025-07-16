@@ -159,6 +159,83 @@ class Report(db.Model):
     period_end = db.Column(db.DateTime)
     generated_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+class Blockchain(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    block_hash = db.Column(db.String(64), unique=True, nullable=False)
+    previous_hash = db.Column(db.String(64))
+    transaction_data = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    nonce = db.Column(db.Integer, default=0)
+    transaction_type = db.Column(db.String(50))  # contribution, loan, expense
+    amount = db.Column(db.Float)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'))
+
+class AIInsight(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    insight_type = db.Column(db.String(50), nullable=False)  # prediction, recommendation, alert
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    confidence_score = db.Column(db.Float)  # 0-1
+    data_points = db.Column(db.Text)  # JSON
+    generated_date = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='Active')
+    priority = db.Column(db.String(20), default='Medium')
+
+class Biometric(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    biometric_type = db.Column(db.String(20), nullable=False)  # fingerprint, face, voice
+    biometric_hash = db.Column(db.String(256), nullable=False)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    last_used = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+
+class SmartContract(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    contract_name = db.Column(db.String(100), nullable=False)
+    contract_type = db.Column(db.String(50), nullable=False)  # loan, investment, savings
+    conditions = db.Column(db.Text, nullable=False)  # JSON
+    parties = db.Column(db.Text)  # JSON of member IDs
+    status = db.Column(db.String(20), default='Active')
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    executed_date = db.Column(db.DateTime)
+    amount = db.Column(db.Float)
+    auto_execute = db.Column(db.Boolean, default=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class IoTDevice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    device_name = db.Column(db.String(100), nullable=False)
+    device_type = db.Column(db.String(50), nullable=False)  # sensor, camera, beacon
+    device_id = db.Column(db.String(100), unique=True, nullable=False)
+    location = db.Column(db.String(200))
+    status = db.Column(db.String(20), default='Active')
+    last_ping = db.Column(db.DateTime)
+    data = db.Column(db.Text)  # JSON sensor data
+    battery_level = db.Column(db.Integer)
+
+class VirtualReality(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_name = db.Column(db.String(100), nullable=False)
+    session_type = db.Column(db.String(50), nullable=False)  # meeting, training, presentation
+    vr_room_id = db.Column(db.String(100), unique=True)
+    participants = db.Column(db.Text)  # JSON of member IDs
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime)
+    recording_url = db.Column(db.String(300))
+    status = db.Column(db.String(20), default='Scheduled')
+
+class CryptoWallet(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'), nullable=False)
+    wallet_address = db.Column(db.String(100), unique=True, nullable=False)
+    private_key_hash = db.Column(db.String(256), nullable=False)
+    balance_btc = db.Column(db.Float, default=0)
+    balance_eth = db.Column(db.Float, default=0)
+    balance_usdt = db.Column(db.Float, default=0)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+
 # User loader for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
@@ -322,6 +399,112 @@ def calculate_portfolio_performance():
         'profit_loss': total_current - total_invested,
         'roi_percentage': ((total_current - total_invested) / total_invested * 100) if total_invested > 0 else 0
     }
+
+# Blockchain Functions
+import hashlib
+import json
+
+def create_blockchain_transaction(transaction_type, amount, member_id, data):
+    # Get the last block
+    last_block = Blockchain.query.order_by(Blockchain.id.desc()).first()
+    previous_hash = last_block.block_hash if last_block else '0' * 64
+    
+    # Create transaction data
+    transaction_data = {
+        'type': transaction_type,
+        'amount': amount,
+        'member_id': member_id,
+        'timestamp': datetime.utcnow().isoformat(),
+        'data': data
+    }
+    
+    # Calculate hash
+    block_string = json.dumps(transaction_data, sort_keys=True) + previous_hash
+    block_hash = hashlib.sha256(block_string.encode()).hexdigest()
+    
+    # Create blockchain entry
+    blockchain_entry = Blockchain(
+        block_hash=block_hash,
+        previous_hash=previous_hash,
+        transaction_data=json.dumps(transaction_data),
+        transaction_type=transaction_type,
+        amount=amount,
+        member_id=member_id
+    )
+    
+    db.session.add(blockchain_entry)
+    return blockchain_entry
+
+# AI-Powered Analytics
+def generate_ai_insights():
+    insights = []
+    
+    # Analyze contribution patterns
+    contributions = Contribution.query.all()
+    if len(contributions) > 5:
+        avg_contribution = sum(c.amount for c in contributions) / len(contributions)
+        recent_avg = sum(c.amount for c in contributions[-5:]) / 5
+        
+        if recent_avg > avg_contribution * 1.2:
+            insights.append({
+                'type': 'prediction',
+                'title': 'Increasing Contribution Trend',
+                'description': f'Recent contributions are 20% higher than average. Projected monthly growth: {((recent_avg - avg_contribution) / avg_contribution * 100):.1f}%',
+                'confidence': 0.85,
+                'priority': 'High'
+            })
+    
+    # Risk assessment
+    high_risk_members = calculate_risk_analysis()['predictions']
+    high_risk_count = len([m for m in high_risk_members if m['risk_level'] == 'High Risk'])
+    
+    if high_risk_count > 0:
+        insights.append({
+            'type': 'alert',
+            'title': 'High Risk Members Alert',
+            'description': f'{high_risk_count} members have high default risk. Recommend immediate review.',
+            'confidence': 0.92,
+            'priority': 'Critical'
+        })
+    
+    # Investment recommendations
+    portfolio = calculate_portfolio_performance()
+    if portfolio['roi_percentage'] < 5:
+        insights.append({
+            'type': 'recommendation',
+            'title': 'Investment Diversification Needed',
+            'description': 'Current ROI is below 5%. Consider diversifying into high-yield bonds or real estate.',
+            'confidence': 0.78,
+            'priority': 'Medium'
+        })
+    
+    return insights
+
+# Smart Contract Execution
+def execute_smart_contracts():
+    active_contracts = SmartContract.query.filter_by(status='Active', auto_execute=True).all()
+    
+    for contract in active_contracts:
+        conditions = json.loads(contract.conditions)
+        
+        # Example: Auto-approve loans under certain conditions
+        if contract.contract_type == 'loan' and 'auto_approve_limit' in conditions:
+            pending_loans = Loan.query.filter_by(status='Pending').all()
+            
+            for loan in pending_loans:
+                if loan.amount <= conditions['auto_approve_limit']:
+                    # Check member's contribution history
+                    member_contributions = sum(c.amount for c in loan.member.contributions)
+                    if member_contributions >= loan.amount * 2:  # 2x contribution requirement
+                        loan.status = 'Approved'
+                        contract.executed_date = datetime.utcnow()
+                        
+                        # Create blockchain record
+                        create_blockchain_transaction('loan_approval', loan.amount, loan.member_id, {
+                            'loan_id': loan.id,
+                            'auto_approved': True,
+                            'contract_id': contract.id
+                        })
 
 def generate_financial_report(start_date, end_date):
     contributions = Contribution.query.filter(
@@ -911,6 +1094,185 @@ def generate_report():
         return redirect(url_for('reports'))
     return render_template('reports/generate.html')
 
+# Blockchain & Crypto Routes
+@app.route('/blockchain')
+@login_required
+@admin_required
+def blockchain_explorer():
+    blocks = Blockchain.query.order_by(Blockchain.id.desc()).limit(50).all()
+    return render_template('blockchain/explorer.html', blocks=blocks)
+
+@app.route('/crypto-wallet')
+@login_required
+def crypto_wallet():
+    member = Member.query.filter_by(user_id=current_user.id).first()
+    if not member:
+        flash('No member profile found', 'danger')
+        return redirect(url_for('index'))
+    
+    wallet = CryptoWallet.query.filter_by(member_id=member.id).first()
+    if not wallet:
+        # Create wallet
+        import secrets
+        wallet_address = 'CW' + secrets.token_hex(20)
+        private_key = hashlib.sha256(secrets.token_bytes(32)).hexdigest()
+        
+        wallet = CryptoWallet(
+            member_id=member.id,
+            wallet_address=wallet_address,
+            private_key_hash=private_key
+        )
+        db.session.add(wallet)
+        db.session.commit()
+    
+    return render_template('crypto/wallet.html', wallet=wallet)
+
+# AI Insights Routes
+@app.route('/ai-insights')
+@login_required
+def ai_insights():
+    insights = generate_ai_insights()
+    
+    # Save insights to database
+    for insight_data in insights:
+        existing = AIInsight.query.filter_by(
+            title=insight_data['title'],
+            generated_date=datetime.utcnow().date()
+        ).first()
+        
+        if not existing:
+            insight = AIInsight(
+                insight_type=insight_data['type'],
+                title=insight_data['title'],
+                description=insight_data['description'],
+                confidence_score=insight_data['confidence'],
+                priority=insight_data['priority']
+            )
+            db.session.add(insight)
+    
+    db.session.commit()
+    
+    all_insights = AIInsight.query.filter_by(status='Active').order_by(AIInsight.generated_date.desc()).all()
+    return render_template('ai/insights.html', insights=all_insights)
+
+# Smart Contracts Routes
+@app.route('/smart-contracts')
+@login_required
+@admin_required
+def smart_contracts():
+    contracts = SmartContract.query.order_by(SmartContract.created_date.desc()).all()
+    return render_template('smart_contracts/list.html', contracts=contracts)
+
+@app.route('/smart-contracts/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_smart_contract():
+    if request.method == 'POST':
+        conditions = {
+            'auto_approve_limit': float(request.form.get('auto_approve_limit', 0)),
+            'contribution_multiplier': float(request.form.get('contribution_multiplier', 2)),
+            'max_loan_term_days': int(request.form.get('max_loan_term', 90))
+        }
+        
+        contract = SmartContract(
+            contract_name=request.form.get('name'),
+            contract_type=request.form.get('type'),
+            conditions=json.dumps(conditions),
+            amount=float(request.form.get('amount', 0))
+        )
+        db.session.add(contract)
+        db.session.commit()
+        flash('Smart contract created successfully!', 'success')
+        return redirect(url_for('smart_contracts'))
+    
+    return render_template('smart_contracts/create.html')
+
+# IoT Dashboard
+@app.route('/iot-dashboard')
+@login_required
+@admin_required
+def iot_dashboard():
+    devices = IoTDevice.query.all()
+    return render_template('iot/dashboard.html', devices=devices)
+
+# VR Meeting Routes
+@app.route('/vr-meetings')
+@login_required
+def vr_meetings():
+    vr_sessions = VirtualReality.query.order_by(VirtualReality.start_time.desc()).all()
+    return render_template('vr/meetings.html', sessions=vr_sessions)
+
+@app.route('/vr-meetings/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_vr_meeting():
+    if request.method == 'POST':
+        import secrets
+        vr_room_id = 'VR' + secrets.token_hex(8)
+        
+        vr_session = VirtualReality(
+            session_name=request.form.get('name'),
+            session_type=request.form.get('type'),
+            vr_room_id=vr_room_id,
+            start_time=datetime.strptime(request.form.get('start_time'), '%Y-%m-%dT%H:%M')
+        )
+        db.session.add(vr_session)
+        db.session.commit()
+        flash('VR meeting scheduled successfully!', 'success')
+        return redirect(url_for('vr_meetings'))
+    
+    return render_template('vr/create.html')
+
+# Biometric Authentication
+@app.route('/biometric-setup')
+@login_required
+def biometric_setup():
+    biometrics = Biometric.query.filter_by(user_id=current_user.id, is_active=True).all()
+    return render_template('biometric/setup.html', biometrics=biometrics)
+
+# API for modern features
+@app.route('/api/blockchain/verify', methods=['POST'])
+@login_required
+def verify_blockchain():
+    blocks = Blockchain.query.order_by(Blockchain.id).all()
+    
+    for i, block in enumerate(blocks):
+        if i == 0:  # Genesis block
+            continue
+        
+        previous_block = blocks[i-1]
+        if block.previous_hash != previous_block.block_hash:
+            return jsonify({'valid': False, 'error': f'Block {block.id} has invalid previous hash'})
+    
+    return jsonify({'valid': True, 'message': 'Blockchain is valid'})
+
+@app.route('/api/ai/predict-default/<int:member_id>')
+@login_required
+@admin_required
+def predict_member_default(member_id):
+    member = Member.query.get_or_404(member_id)
+    
+    # Simple ML prediction based on contribution patterns
+    contributions = member.contributions
+    loans = member.loans
+    
+    if not contributions:
+        return jsonify({'risk_score': 0.8, 'risk_level': 'High', 'reason': 'No contribution history'})
+    
+    avg_contribution = sum(c.amount for c in contributions) / len(contributions)
+    total_loans = sum(l.amount for l in loans)
+    
+    risk_score = min(1.0, total_loans / (avg_contribution * len(contributions)) if contributions else 1.0)
+    
+    risk_level = 'High' if risk_score > 0.7 else 'Medium' if risk_score > 0.4 else 'Low'
+    
+    return jsonify({
+        'risk_score': risk_score,
+        'risk_level': risk_level,
+        'avg_contribution': avg_contribution,
+        'total_loans': total_loans
+    })
+
 # Create database tables and add sample data
 with app.app_context():
     db.drop_all()
@@ -944,7 +1306,28 @@ with app.app_context():
         goal2 = Goal(title='Investment Capital', description='Raise capital for new investments', target_amount=500000, current_amount=150000,
                     target_date=datetime.utcnow() + timedelta(days=180), category='investment', created_by=admin.id)
         
-        db.session.add_all([member1, member2, member3, activity1, activity2, investment1, investment2, goal1, goal2])
+        # Sample smart contract
+        smart_contract1 = SmartContract(
+            contract_name='Auto Loan Approval',
+            contract_type='loan',
+            conditions=json.dumps({
+                'auto_approve_limit': 10000,
+                'contribution_multiplier': 2,
+                'max_loan_term_days': 90
+            }),
+            created_by=admin.id
+        )
+        
+        # Sample IoT device
+        iot_device1 = IoTDevice(
+            device_name='Office Security Camera',
+            device_type='camera',
+            device_id='CAM001',
+            location='Main Office',
+            battery_level=85
+        )
+        
+        db.session.add_all([member1, member2, member3, activity1, activity2, investment1, investment2, goal1, goal2, smart_contract1, iot_device1])
         db.session.commit()
 
 if __name__ == '__main__':
