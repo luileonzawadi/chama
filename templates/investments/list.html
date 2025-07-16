@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i>Investment Portfolio</h2>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('add_investment') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Add Investment
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Portfolio Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>KSH {{ "%.0f"|format(portfolio.total_invested) }}</h4>
+                    <small>Total Invested</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>KSH {{ "%.0f"|format(portfolio.current_value) }}</h4>
+                    <small>Current Value</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-{{ 'success' if portfolio.profit_loss >= 0 else 'danger' }} text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>KSH {{ "%.0f"|format(portfolio.profit_loss) }}</h4>
+                    <small>Profit/Loss</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body stats-card text-center">
+                    <h4>{{ "%.1f"|format(portfolio.roi_percentage) }}%</h4>
+                    <small>ROI</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investments List -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Investment Holdings</h5>
+        </div>
+        <div class="card-body">
+            {% if investments %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Investment</th>
+                            <th>Type</th>
+                            <th>Amount Invested</th>
+                            <th>Current Value</th>
+                            <th>Return</th>
+                            <th>Purchase Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for investment in investments %}
+                        <tr>
+                            <td>
+                                <strong>{{ investment.name }}</strong>
+                                {% if investment.description %}
+                                <br><small class="text-muted">{{ investment.description }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ investment.type.replace('_', ' ').title() }}</span>
+                            </td>
+                            <td>KSH {{ "%.0f"|format(investment.amount_invested) }}</td>
+                            <td>KSH {{ "%.0f"|format(investment.current_value) }}</td>
+                            <td>
+                                {% set return_amount = investment.current_value - investment.amount_invested %}
+                                {% set return_percent = (return_amount / investment.amount_invested * 100) if investment.amount_invested > 0 else 0 %}
+                                <span class="text-{{ 'success' if return_amount >= 0 else 'danger' }}">
+                                    KSH {{ "%.0f"|format(return_amount) }} ({{ "%.1f"|format(return_percent) }}%)
+                                </span>
+                            </td>
+                            <td>{{ investment.purchase_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if investment.status == 'Active' else 'secondary' }}">
+                                    {{ investment.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                <h5>No Investments Yet</h5>
+                <p class="text-muted">Start building your investment portfolio</p>
+                {% if current_user.is_admin %}
+                <a href="{{ url_for('add_investment') }}" class="btn btn-primary">Add First Investment</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-receipt me-2"></i>Expense Management</h2>
+        <a href="{{ url_for('add_expense') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Add Expense
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>{{ 'All Expenses' if current_user.is_admin else 'My Expenses' }}</h5>
+        </div>
+        <div class="card-body">
+            {% if expenses %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            {% if current_user.is_admin %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ expense.category.title() }}</span>
+                            </td>
+                            <td>{{ expense.description }}</td>
+                            <td>KSH {{ "%.2f"|format(expense.amount) }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if expense.status == 'Approved' else 'warning' if expense.status == 'Pending' else 'danger' }}">
+                                    {{ expense.status }}
+                                </span>
+                            </td>
+                            {% if current_user.is_admin and expense.status == 'Pending' %}
+                            <td>
+                                <a href="{{ url_for('approve_expense', expense_id=expense.id) }}" 
+                                   class="btn btn-sm btn-success">Approve</a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                <h5>No Expenses</h5>
+                <p class="text-muted">No expense records found</p>
+                <a href="{{ url_for('add_expense') }}" class="btn btn-primary">Add First Expense</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

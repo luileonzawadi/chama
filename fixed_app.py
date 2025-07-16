@@ -102,6 +102,63 @@ class Activity(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref='activities')
 
+class Investment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    type = db.Column(db.String(50), nullable=False)  # stocks, bonds, real_estate, business
+    amount_invested = db.Column(db.Float, nullable=False)
+    current_value = db.Column(db.Float, default=0)
+    purchase_date = db.Column(db.DateTime, default=datetime.utcnow)
+    description = db.Column(db.Text)
+    status = db.Column(db.String(20), default='Active')
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class Expense(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(200), nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    receipt_url = db.Column(db.String(200))
+    approved_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    status = db.Column(db.String(20), default='Pending')
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class Goal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    target_amount = db.Column(db.Float, nullable=False)
+    current_amount = db.Column(db.Float, default=0)
+    target_date = db.Column(db.DateTime, nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(20), default='Active')
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Meeting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    agenda = db.Column(db.Text)
+    date = db.Column(db.DateTime, nullable=False)
+    location = db.Column(db.String(200))
+    meeting_link = db.Column(db.String(300))
+    minutes = db.Column(db.Text)
+    attendees = db.Column(db.Text)  # JSON string of attendee IDs
+    status = db.Column(db.String(20), default='Scheduled')
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class Report(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    type = db.Column(db.String(50), nullable=False)  # financial, member, activity
+    content = db.Column(db.Text)
+    file_path = db.Column(db.String(300))
+    generated_date = db.Column(db.DateTime, default=datetime.utcnow)
+    period_start = db.Column(db.DateTime)
+    period_end = db.Column(db.DateTime)
+    generated_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+
 # User loader for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
@@ -253,6 +310,37 @@ def logout():
     db.session.commit()
     logout_user()
     return redirect(url_for('login'))
+
+# Investment tracking functions
+def calculate_portfolio_performance():
+    investments = Investment.query.filter_by(status='Active').all()
+    total_invested = sum(inv.amount_invested for inv in investments)
+    total_current = sum(inv.current_value for inv in investments)
+    return {
+        'total_invested': total_invested,
+        'current_value': total_current,
+        'profit_loss': total_current - total_invested,
+        'roi_percentage': ((total_current - total_invested) / total_invested * 100) if total_invested > 0 else 0
+    }
+
+def generate_financial_report(start_date, end_date):
+    contributions = Contribution.query.filter(
+        Contribution.date.between(start_date, end_date)
+    ).all()
+    loans = Loan.query.filter(
+        Loan.date_applied.between(start_date, end_date)
+    ).all()
+    expenses = Expense.query.filter(
+        Expense.date.between(start_date, end_date),
+        Expense.status == 'Approved'
+    ).all()
+    
+    return {
+        'total_contributions': sum(c.amount for c in contributions),
+        'total_loans': sum(l.amount for l in loans),
+        'total_expenses': sum(e.amount for e in expenses),
+        'net_position': sum(c.amount for c in contributions) - sum(l.amount for l in loans) - sum(e.amount for e in expenses)
+    }
 
 # M-Pesa STK Push function
 def initiate_stk_push(phone, amount, account_ref):
@@ -674,6 +762,155 @@ def change_password():
     
     return render_template('account/change_password.html')
 
+# Investment Management Routes
+@app.route('/investments')
+@login_required
+def investments():
+    investments = Investment.query.order_by(Investment.purchase_date.desc()).all()
+    portfolio = calculate_portfolio_performance()
+    return render_template('investments/list.html', investments=investments, portfolio=portfolio)
+
+@app.route('/investments/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_investment():
+    if request.method == 'POST':
+        investment = Investment(
+            name=request.form.get('name'),
+            type=request.form.get('type'),
+            amount_invested=float(request.form.get('amount')),
+            current_value=float(request.form.get('amount')),
+            description=request.form.get('description'),
+            created_by=current_user.id
+        )
+        db.session.add(investment)
+        db.session.commit()
+        flash('Investment added successfully!', 'success')
+        return redirect(url_for('investments'))
+    return render_template('investments/add.html')
+
+# Expense Management Routes
+@app.route('/expenses')
+@login_required
+def expenses():
+    if current_user.is_admin:
+        expenses = Expense.query.order_by(Expense.date.desc()).all()
+    else:
+        expenses = Expense.query.filter_by(created_by=current_user.id).order_by(Expense.date.desc()).all()
+    return render_template('expenses/list.html', expenses=expenses)
+
+@app.route('/expenses/add', methods=['GET', 'POST'])
+@login_required
+def add_expense():
+    if request.method == 'POST':
+        expense = Expense(
+            category=request.form.get('category'),
+            amount=float(request.form.get('amount')),
+            description=request.form.get('description'),
+            created_by=current_user.id
+        )
+        db.session.add(expense)
+        db.session.commit()
+        flash('Expense submitted for approval!', 'success')
+        return redirect(url_for('expenses'))
+    return render_template('expenses/add.html')
+
+@app.route('/expenses/<int:expense_id>/approve')
+@login_required
+@admin_required
+def approve_expense(expense_id):
+    expense = Expense.query.get_or_404(expense_id)
+    expense.status = 'Approved'
+    expense.approved_by = current_user.id
+    db.session.commit()
+    flash('Expense approved!', 'success')
+    return redirect(url_for('expenses'))
+
+# Goals Management Routes
+@app.route('/goals')
+@login_required
+def goals():
+    goals = Goal.query.order_by(Goal.target_date).all()
+    return render_template('goals/list.html', goals=goals)
+
+@app.route('/goals/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_goal():
+    if request.method == 'POST':
+        goal = Goal(
+            title=request.form.get('title'),
+            description=request.form.get('description'),
+            target_amount=float(request.form.get('target_amount')),
+            target_date=datetime.strptime(request.form.get('target_date'), '%Y-%m-%d'),
+            category=request.form.get('category'),
+            created_by=current_user.id
+        )
+        db.session.add(goal)
+        db.session.commit()
+        flash('Goal created successfully!', 'success')
+        return redirect(url_for('goals'))
+    return render_template('goals/add.html')
+
+# Meeting Management Routes
+@app.route('/meetings')
+@login_required
+def meetings():
+    meetings = Meeting.query.order_by(Meeting.date.desc()).all()
+    return render_template('meetings/list.html', meetings=meetings)
+
+@app.route('/meetings/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_meeting():
+    if request.method == 'POST':
+        meeting = Meeting(
+            title=request.form.get('title'),
+            agenda=request.form.get('agenda'),
+            date=datetime.strptime(request.form.get('date'), '%Y-%m-%dT%H:%M'),
+            location=request.form.get('location'),
+            meeting_link=request.form.get('meeting_link'),
+            created_by=current_user.id
+        )
+        db.session.add(meeting)
+        db.session.commit()
+        flash('Meeting scheduled successfully!', 'success')
+        return redirect(url_for('meetings'))
+    return render_template('meetings/add.html')
+
+# Reports Routes
+@app.route('/reports')
+@login_required
+@admin_required
+def reports():
+    reports = Report.query.order_by(Report.generated_date.desc()).all()
+    return render_template('reports/list.html', reports=reports)
+
+@app.route('/reports/generate', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def generate_report():
+    if request.method == 'POST':
+        start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d')
+        end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d')
+        report_type = request.form.get('type')
+        
+        financial_data = generate_financial_report(start_date, end_date)
+        
+        report = Report(
+            title=f'{report_type.title()} Report - {start_date.strftime("%b %Y")}',
+            type=report_type,
+            content=str(financial_data),
+            period_start=start_date,
+            period_end=end_date,
+            generated_by=current_user.id
+        )
+        db.session.add(report)
+        db.session.commit()
+        flash('Report generated successfully!', 'success')
+        return redirect(url_for('reports'))
+    return render_template('reports/generate.html')
+
 # Create database tables and add sample data
 with app.app_context():
     db.drop_all()
@@ -697,7 +934,17 @@ with app.app_context():
         activity2 = Activity(title='Investment Review', description='Review of investment portfolio', 
                            date=datetime.utcnow() + timedelta(days=14), type='review', created_by=admin.id)
         
-        db.session.add_all([member1, member2, member3, activity1, activity2])
+        # Sample investments
+        investment1 = Investment(name='Treasury Bonds', type='bonds', amount_invested=50000, current_value=52000, created_by=admin.id)
+        investment2 = Investment(name='Real Estate - Plot', type='real_estate', amount_invested=200000, current_value=220000, created_by=admin.id)
+        
+        # Sample goals
+        goal1 = Goal(title='Emergency Fund', description='Build emergency fund', target_amount=100000, current_amount=25000, 
+                    target_date=datetime.utcnow() + timedelta(days=365), category='savings', created_by=admin.id)
+        goal2 = Goal(title='Investment Capital', description='Raise capital for new investments', target_amount=500000, current_amount=150000,
+                    target_date=datetime.utcnow() + timedelta(days=180), category='investment', created_by=admin.id)
+        
+        db.session.add_all([member1, member2, member3, activity1, activity2, investment1, investment2, goal1, goal2])
         db.session.commit()
 
 if __name__ == '__main__':

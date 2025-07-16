@@ -158,6 +158,11 @@
         .sidebar-link .fa-comments { color: #007bff; }
         .sidebar-link .fa-calendar { color: #28a745; }
         .sidebar-link .fa-shield-alt { color: #dc3545; }
+        .sidebar-link .fa-chart-line { color: #28a745; }
+        .sidebar-link .fa-receipt { color: #ffc107; }
+        .sidebar-link .fa-bullseye { color: #dc3545; }
+        .sidebar-link .fa-video { color: #6f42c1; }
+        .sidebar-link .fa-file-alt { color: #17a2b8; }
         
         .sidebar-divider {
             height: 1px;
@@ -307,6 +312,26 @@
                 <i class="fas fa-brain"></i>
                 <span>AI Insights</span>
             </a>
+            <a href="{{ url_for('investments') }}" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Investments</span>
+            </a>
+            <a href="{{ url_for('expenses') }}" class="sidebar-link">
+                <i class="fas fa-receipt"></i>
+                <span>Expenses</span>
+            </a>
+            <a href="{{ url_for('goals') }}" class="sidebar-link">
+                <i class="fas fa-bullseye"></i>
+                <span>Goals</span>
+            </a>
+            <a href="{{ url_for('meetings') }}" class="sidebar-link">
+                <i class="fas fa-video"></i>
+                <span>Meetings</span>
+            </a>
+            <a href="{{ url_for('reports') }}" class="sidebar-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
         </nav>
         {% else %}
         <!-- User Sidebar -->
@@ -345,6 +370,22 @@
             <a href="{{ url_for('notifications') }}" class="sidebar-link">
                 <i class="fas fa-bell"></i>
                 <span>Notifications</span>
+            </a>
+            <a href="{{ url_for('investments') }}" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Investments</span>
+            </a>
+            <a href="{{ url_for('expenses') }}" class="sidebar-link">
+                <i class="fas fa-receipt"></i>
+                <span>My Expenses</span>
+            </a>
+            <a href="{{ url_for('goals') }}" class="sidebar-link">
+                <i class="fas fa-bullseye"></i>
+                <span>Goals</span>
+            </a>
+            <a href="{{ url_for('meetings') }}" class="sidebar-link">
+                <i class="fas fa-video"></i>
+                <span>Meetings</span>
             </a>
         </nav>
         {% endif %}
