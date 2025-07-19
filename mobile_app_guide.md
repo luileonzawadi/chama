@@ -94,12 +94,19 @@ const makeContribution = async (amount, phone, description) => {
 7. **Deployment**: Build and distribute app
 
 ## Features Ready for Mobile:
-- ✅ User Authentication
+- ✅ User Authentication (admin creates all accounts)
 - ✅ Dashboard with Stats
 - ✅ M-Pesa Payments
 - ✅ Loan Management
 - ✅ Discussions
 - ✅ Activities
 - ✅ Real-time Data
+- ✅ View VR Meetings (admin-created only)
+- ✅ View AI Insights (admin-generated only)
 
 Your backend is now mobile-ready with REST APIs!
+
+## User Management Note:
+- Only the admin can create new user accounts
+- Default admin credentials: username: `admin`, password: `admin`
+- New users get a default password: `0000` (they should change it on first login)

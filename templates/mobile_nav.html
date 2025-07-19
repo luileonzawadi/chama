@@ -1,0 +1,53 @@
+<!-- Mobile Bottom Navigation -->
+<div class="mobile-nav d-md-none">
+    {% if current_user.is_admin %}
+    <!-- Admin Mobile Nav -->
+    <a href="{{ url_for('admin_dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('admin_members') }}" class="mobile-nav-item {% if request.endpoint == 'admin_members' %}active{% endif %}">
+        <i class="fas fa-users"></i>
+        <span>Members</span>
+    </a>
+    <a href="{{ url_for('admin_loan_requests') }}" class="mobile-nav-item {% if request.endpoint == 'admin_loan_requests' %}active{% endif %}">
+        <i class="fas fa-handshake"></i>
+        <span>Loans</span>
+    </a>
+    <a href="{{ url_for('ai_insights') }}" class="mobile-nav-item {% if request.endpoint == 'ai_insights' %}active{% endif %}">
+        <i class="fas fa-robot"></i>
+        <span>AI</span>
+    </a>
+    <a href="#" class="mobile-nav-item" id="mobileMenuToggle">
+        <i class="fas fa-ellipsis-h"></i>
+        <span>More</span>
+    </a>
+    {% else %}
+    <!-- User Mobile Nav -->
+    <a href="{{ url_for('index') }}" class="mobile-nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="{{ url_for('contribute') }}" class="mobile-nav-item {% if request.endpoint == 'contribute' %}active{% endif %}">
+        <i class="fas fa-plus-circle"></i>
+        <span>Pay</span>
+    </a>
+    <a href="{{ url_for('loans') }}" class="mobile-nav-item {% if request.endpoint == 'loans' %}active{% endif %}">
+        <i class="fas fa-hand-holding-usd"></i>
+        <span>Loans</span>
+    </a>
+    <a href="{{ url_for('crypto_wallet') }}" class="mobile-nav-item {% if request.endpoint == 'crypto_wallet' %}active{% endif %}">
+        <i class="fas fa-wallet"></i>
+        <span>Wallet</span>
+    </a>
+    <a href="#" class="mobile-nav-item" id="mobileMenuToggle">
+        <i class="fas fa-ellipsis-h"></i>
+        <span>More</span>
+    </a>
+    {% endif %}
+</div>
+
+<!-- Mobile Sidebar Toggle Button -->
+<button class="sidebar-toggle d-md-none" id="sidebarToggle">
+    <i class="fas fa-bars"></i>
+</button>

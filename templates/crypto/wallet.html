@@ -136,6 +136,30 @@
 #qrcode {
     margin: 20px 0;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    #qrcode canvas {
+        width: 150px !important;
+        height: 150px !important;
+    }
+    
+    .d-grid .btn {
+        margin-bottom: 10px;
+    }
+    
+    .row {
+        margin-bottom: 0;
+    }
+    
+    .col-md-4, .col-md-6, .col-md-8 {
+        margin-bottom: 15px;
+    }
+    
+    .input-group {
+        flex-wrap: nowrap;
+    }
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>

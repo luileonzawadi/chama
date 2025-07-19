@@ -1,0 +1,27 @@
+/* Compact card styles for action cards */
+.action-card {
+  max-width: 300px;
+  margin-bottom: 15px;
+}
+
+/* Scrollable content for list cards */
+.list-card .card-body {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+/* Ensure tables inside scrollable cards have proper width */
+.list-card table {
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .action-card {
+    max-width: 100%;
+  }
+  
+  .list-card .card-body {
+    max-height: 300px;
+  }
+}

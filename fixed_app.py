@@ -246,7 +246,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_admin:
-            abort(403)
+            return render_template('access_denied.html'), 403
         return f(*args, **kwargs)
     return decorated_function
 
@@ -1131,29 +1131,32 @@ def crypto_wallet():
 @app.route('/ai-insights')
 @login_required
 def ai_insights():
-    insights = generate_ai_insights()
-    
-    # Save insights to database
-    for insight_data in insights:
-        existing = AIInsight.query.filter_by(
-            title=insight_data['title'],
-            generated_date=datetime.utcnow().date()
-        ).first()
+    # Only admins can generate new insights
+    if current_user.is_admin:
+        insights = generate_ai_insights()
         
-        if not existing:
-            insight = AIInsight(
-                insight_type=insight_data['type'],
+        # Save insights to database
+        for insight_data in insights:
+            existing = AIInsight.query.filter_by(
                 title=insight_data['title'],
-                description=insight_data['description'],
-                confidence_score=insight_data['confidence'],
-                priority=insight_data['priority']
-            )
-            db.session.add(insight)
+                generated_date=datetime.utcnow().date()
+            ).first()
+            
+            if not existing:
+                insight = AIInsight(
+                    insight_type=insight_data['type'],
+                    title=insight_data['title'],
+                    description=insight_data['description'],
+                    confidence_score=insight_data['confidence'],
+                    priority=insight_data['priority']
+                )
+                db.session.add(insight)
+        
+        db.session.commit()
     
-    db.session.commit()
-    
+    # Both admins and regular users can view insights
     all_insights = AIInsight.query.filter_by(status='Active').order_by(AIInsight.generated_date.desc()).all()
-    return render_template('ai/insights.html', insights=all_insights)
+    return render_template('ai/insights.html', insights=all_insights, is_admin=current_user.is_admin)
 
 # Smart Contracts Routes
 @app.route('/smart-contracts')
@@ -1200,7 +1203,7 @@ def iot_dashboard():
 @login_required
 def vr_meetings():
     vr_sessions = VirtualReality.query.order_by(VirtualReality.start_time.desc()).all()
-    return render_template('vr/meetings.html', sessions=vr_sessions)
+    return render_template('vr/meetings.html', sessions=vr_sessions, is_admin=current_user.is_admin)
 
 @app.route('/vr-meetings/create', methods=['GET', 'POST'])
 @login_required
@@ -1280,16 +1283,13 @@ with app.app_context():
     
     if not User.query.filter_by(is_admin=True).first():
         admin_user = User(username='admin', password=generate_password_hash('admin'), is_admin=True)
-        regular_user = User(username='user', password=generate_password_hash('user'), is_admin=False)
-        db.session.add_all([admin_user, regular_user])
+        db.session.add(admin_user)
         db.session.commit()
         
         admin = User.query.filter_by(username='admin').first()
-        user = User.query.filter_by(username='user').first()
         
         member1 = Member(name='John Doe', phone='0712345678', email='john@example.com', user_id=admin.id)
         member2 = Member(name='Jane Smith', phone='0723456789', email='jane@example.com', user_id=admin.id)
-        member3 = Member(name='Michael Johnson', phone='0734567890', email='michael@example.com', user_id=user.id)
         
         activity1 = Activity(title='Monthly Meeting', description='Regular monthly chama meeting', 
                            date=datetime.utcnow() + timedelta(days=7), type='meeting', created_by=admin.id)
@@ -1327,8 +1327,13 @@ with app.app_context():
             battery_level=85
         )
         
-        db.session.add_all([member1, member2, member3, activity1, activity2, investment1, investment2, goal1, goal2, smart_contract1, iot_device1])
+        db.session.add_all([member1, member2, activity1, activity2, investment1, investment2, goal1, goal2, smart_contract1, iot_device1])
         db.session.commit()
+
+# Error handlers
+@app.errorhandler(403)
+def forbidden_error(error):
+    return render_template('access_denied.html'), 403
 
 if __name__ == '__main__':
     app.run(debug=True)

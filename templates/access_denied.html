@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4><i class="fas fa-exclamation-triangle me-2"></i>Access Denied</h4>
+                </div>
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-lock fa-4x text-danger mb-4"></i>
+                    <h3>Permission Restricted</h3>
+                    <p class="lead">You don't have permission to access this feature.</p>
+                    <p class="text-muted">Only administrators can create or modify this content.</p>
+                    <p class="text-muted">Regular users can view content when it's made available by an admin.</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-home me-2"></i>Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+/* Mobile Responsive Styles for Smart Contracts */
+@media (max-width: 768px) {
+    .card-footer {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-footer .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    
+    .font-monospace {
+        font-size: 0.7rem;
+        word-break: break-all;
+    }
+}

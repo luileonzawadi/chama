@@ -130,6 +130,37 @@
 .font-monospace {
     font-family: 'Courier New', monospace;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .blockchain-container {
+        max-height: 400px;
+    }
+    
+    .block-card .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .block-card .badge {
+        margin-top: 5px;
+    }
+    
+    .font-monospace {
+        font-size: 0.7rem;
+        word-break: break-all;
+    }
+    
+    .block-card .row {
+        flex-direction: column;
+    }
+    
+    .block-card .col-md-6,
+    .block-card .col-md-4 {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
 </style>
 
 <script>
