@@ -945,6 +945,23 @@ def change_password():
     
     return render_template('account/change_password.html')
 
+@app.route('/reset-password', methods=['GET', 'POST'])
+def password_reset():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        user = User.query.filter_by(username=username).first()
+        
+        if user:
+            user.password = generate_password_hash('0000')
+            db.session.commit()
+            flash('Password has been reset to 0000. Please login and change it immediately.', 'success')
+        else:
+            flash('Username not found', 'danger')
+        
+        return redirect(url_for('login'))
+    
+    return render_template('auth/reset_password.html')
+
 # Investment Management Routes
 @app.route('/investments')
 @login_required
