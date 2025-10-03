@@ -1,6 +1,6 @@
 /* Compact card styles for action cards */
 .action-card {
-  max-width: 300px;
+  max-width: 250px;
   margin-bottom: 15px;
 }
 
@@ -12,7 +12,7 @@
 
 /* Ensure tables inside scrollable cards have proper width */
 .list-card table {
-  width: 100%;
+  width: 50%;
 }
 
 /* Responsive adjustments */
