@@ -1347,6 +1347,39 @@ with app.app_context():
         db.session.add_all([member1, member2, activity1, activity2, investment1, investment2, goal1, goal2, smart_contract1, iot_device1])
         db.session.commit()
 
+# API Routes for Mobile
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    
+    user = User.query.filter_by(username=username).first()
+    if user and check_password_hash(user.password, password):
+        return {'success': True, 'user_id': user.id, 'is_admin': user.is_admin}
+    return {'success': False, 'message': 'Invalid credentials'}, 401
+
+@app.route('/api/dashboard')
+def api_dashboard():
+    # Simple dashboard data for mobile
+    stats = {
+        'total_members': Member.query.count(),
+        'total_contributions': sum(c.amount for c in Contribution.query.all()),
+        'pending_loans': Loan.query.filter_by(status='Pending').count(),
+        'upcoming_activities': Activity.query.filter(Activity.date >= datetime.utcnow()).count()
+    }
+    return stats
+
+@app.route('/api/contribute', methods=['POST'])
+def api_contribute():
+    data = request.get_json()
+    amount = data.get('amount')
+    phone = data.get('phone')
+    description = data.get('description', '')
+    
+    # Simulate M-Pesa integration
+    return {'success': True, 'message': 'Contribution request sent'}
+
 # Error handlers
 @app.errorhandler(403)
 def forbidden_error(error):

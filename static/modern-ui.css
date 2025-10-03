@@ -46,25 +46,30 @@ body {
 
 /* Compact Action Cards */
 .action-card {
-  max-width: 280px;
+  max-width: 350px;
   margin-bottom: 1rem;
 }
 
 .action-card .card-body {
-  padding: 1rem;
+  padding: 1.25rem;
+}
+
+.action-card.text-center .card-body {
   text-align: center;
 }
 
 .action-card .btn {
-  width: 100%;
   margin-top: 0.5rem;
+}
+
+.action-card.form-card {
+  max-width: 450px;
 }
 
 /* Scrollable List Cards */
 .list-card .card-body {
   max-height: 400px;
   overflow-y: auto;
-  padding: 0;
 }
 
 .list-card .table {
@@ -74,6 +79,15 @@ body {
 .list-card .table td {
   padding: 0.75rem;
   border-top: 1px solid #f3f4f6;
+}
+
+.list-card .table-responsive {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.list-card:not(:has(.table-responsive)) .card-body {
+  padding: 1.5rem;
 }
 
 /* Button Improvements */
