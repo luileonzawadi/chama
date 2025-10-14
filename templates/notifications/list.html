@@ -9,11 +9,17 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">My Notifications</h4>
-                    <span class="badge bg-primary">{{ notifications|length }} notifications</span>
+                    <div>
+                        <span class="badge bg-primary me-2">{{ notifications|length }} notifications</span>
+                        {% if notifications %}
+                        <a href="{{ url_for('clear_notifications') }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to clear all notifications?')">Clear All</a>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="card-body">
-                    {% if notifications %}
+                    {% if notifications or discussions %}
                         <div class="list-group list-group-flush">
+                            <!-- Regular Notifications -->
                             {% for notification in notifications %}
                             <div class="list-group-item {% if not notification.is_read %}list-group-item-light{% endif %}">
                                 <div class="d-flex w-100 justify-content-between">
@@ -24,6 +30,18 @@
                                 {% if not notification.is_read %}
                                     <small class="text-primary">New</small>
                                 {% endif %}
+                            </div>
+                            {% endfor %}
+                            
+                            <!-- Recent Discussions -->
+                            {% for discussion in discussions %}
+                            <div class="list-group-item list-group-item-info">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1"><i class="fas fa-comments me-1"></i>New Discussion: {{ discussion.title }}</h6>
+                                    <small class="text-muted">{{ discussion.date.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <p class="mb-1">{{ discussion.content|truncate(100) }}</p>
+                                <small>Posted by {{ discussion.user.username }} • <a href="{{ url_for('view_discussion', discussion_id=discussion.id) }}" class="text-decoration-none">Join Discussion</a></small>
                             </div>
                             {% endfor %}
                         </div>

@@ -14,197 +14,65 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-6 col-md-3 mb-3 mb-md-0">
-            <div class="card bg-primary text-white shadow">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Users</h5>
-                            <h2 class="card-text">{{ stats.users }}</h2>
-                        </div>
-                        <i class="fas fa-users fa-2x opacity-50"></i>
-                    </div>
-                    <a href="{{ url_for('admin_users') }}" class="btn btn-light btn-sm mt-2">View All</a>
+    <!-- Minimal Stats Cards -->
+    <div class="row mb-3">
+        <div class="col-3">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body p-2">
+                    <h4 class="text-primary mb-0">{{ stats.users }}</h4>
+                    <small class="text-muted">Users</small>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3 mb-3 mb-md-0">
-            <div class="card bg-success text-white shadow">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="card-title mb-1">Members</h6>
-                            <h3 class="card-text mb-0">{{ stats.members }}</h3>
-                        </div>
-                        <i class="fas fa-user-friends fa-lg opacity-50"></i>
-                    </div>
-                    <a href="{{ url_for('admin_members') }}" class="btn btn-light btn-sm mt-2 w-100">View</a>
+        <div class="col-3">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body p-2">
+                    <h4 class="text-success mb-0">{{ stats.members }}</h4>
+                    <small class="text-muted">Members</small>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3 mb-3 mb-md-0">
-            <div class="card bg-info text-white shadow">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="card-title mb-1">Contributions</h6>
-                            <h3 class="card-text mb-0">{{ stats.contributions }}</h3>
-                        </div>
-                        <i class="fas fa-money-bill-wave fa-lg opacity-50"></i>
-                    </div>
-                    <a href="#" class="btn btn-light btn-sm mt-2 w-100">View</a>
+        <div class="col-3">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body p-2">
+                    <h4 class="text-info mb-0">{{ stats.contributions }}</h4>
+                    <small class="text-muted">Contributions</small>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3 mb-3 mb-md-0">
-            <div class="card bg-warning text-dark shadow">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="card-title mb-1">Loans</h6>
-                            <h3 class="card-text mb-0">{{ stats.loans }}</h3>
-                        </div>
-                        <i class="fas fa-hand-holding-usd fa-lg opacity-50"></i>
-                    </div>
-                    <a href="{{ url_for('admin_loan_requests') }}" class="btn btn-light btn-sm mt-2 w-100">View</a>
+        <div class="col-3">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body p-2">
+                    <h4 class="text-warning mb-0">{{ stats.loans }}</h4>
+                    <small class="text-muted">Loans</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <!-- AI Risk Analysis -->
-        <div class="col-12 col-lg-8 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-gradient-danger text-white">
-                    <h5 class="mb-0"><i class="fas fa-robot me-2"></i>AI Default Risk Predictor</h5>
+    <!-- Recent Activity Summary -->
+    <div class="card shadow-sm">
+        <div class="card-body p-3">
+            <h6 class="card-title mb-2">Recent Activity</h6>
+            <div class="row text-center">
+                {% if risk_analysis %}
+                <div class="col-4">
+                    <span class="badge bg-danger">{{ risk_analysis.summary.high_risk }}</span>
+                    <small class="d-block text-muted">High Risk</small>
                 </div>
-                <div class="card-body">
-                    {% if risk_analysis %}
-                        <div class="row mb-3">
-                            <div class="col-md-4 text-center">
-                                <div class="risk-stat">
-                                    <h3 class="text-danger">{{ risk_analysis.summary.high_risk }}</h3>
-                                    <small class="text-muted">High Risk</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-center">
-                                <div class="risk-stat">
-                                    <h3 class="text-warning">{{ risk_analysis.summary.medium_risk }}</h3>
-                                    <small class="text-muted">Medium Risk</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-center">
-                                <div class="risk-stat">
-                                    <h3 class="text-success">{{ risk_analysis.summary.low_risk }}</h3>
-                                    <small class="text-muted">Low Risk</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                            <table class="table table-sm">
-                                <thead class="table-dark sticky-top">
-                                    <tr>
-                                        <th>Member</th>
-                                        <th>Risk Level</th>
-                                        <th>Score</th>
-                                        <th>Key Factors</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for prediction in risk_analysis.predictions[:10] %}
-                                    <tr>
-                                        <td>{{ prediction.member.name }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ prediction.risk_color }}">{{ prediction.risk_level }}</span>
-                                        </td>
-                                        <td>
-                                            <div class="progress" style="width: 60px; height: 20px;">
-                                                <div class="progress-bar bg-{{ prediction.risk_color }}" 
-                                                     style="width: {{ prediction.risk_score }}%">{{ prediction.risk_score }}%</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">
-                                                {% for factor in prediction.risk_factors[:2] %}
-                                                    {{ factor }}{% if not loop.last %}, {% endif %}
-                                                {% endfor %}
-                                            </small>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="text-center mt-3">
-                            <a href="{{ url_for('admin_risk_analysis') }}" class="btn btn-primary">
-                                <i class="fas fa-chart-bar me-1"></i>View Full Analysis
-                            </a>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-robot fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No data available for risk analysis</p>
-                        </div>
-                    {% endif %}
+                <div class="col-4">
+                    <span class="badge bg-warning">{{ risk_analysis.summary.medium_risk }}</span>
+                    <small class="d-block text-muted">Medium Risk</small>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Quick Actions -->
-        <div class="col-12 col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                <div class="col-4">
+                    <span class="badge bg-success">{{ risk_analysis.summary.low_risk }}</span>
+                    <small class="d-block text-muted">Low Risk</small>
                 </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('add_member') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-user-plus me-2"></i>Add Member
-                        </a>
-                        <a href="{{ url_for('admin_loan_requests') }}" class="btn btn-outline-warning">
-                            <i class="fas fa-hand-holding-usd me-2"></i>Manage Loans
-                        </a>
-                        <a href="{{ url_for('send_notification') }}" class="btn btn-outline-info">
-                            <i class="fas fa-bell me-2"></i>Send Notification
-                        </a>
-                        <a href="{{ url_for('admin_ai_insights') }}" class="btn btn-outline-success">
-                            <i class="fas fa-brain me-2"></i>AI Insights
-                        </a>
-                    </div>
+                {% else %}
+                <div class="col-12">
+                    <small class="text-muted">No recent activity data</small>
                 </div>
-            </div>
-            
-            <!-- AI Recommendations -->
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>AI Recommendations</h5>
-                </div>
-                <div class="card-body">
-                    {% if risk_analysis and risk_analysis.summary.high_risk > 0 %}
-                        <div class="alert alert-warning alert-sm mb-2">
-                            <i class="fas fa-exclamation-triangle me-1"></i>
-                            <strong>{{ risk_analysis.summary.high_risk }}</strong> members have high default risk
-                        </div>
-                    {% endif %}
-                    
-                    <div class="recommendation-item mb-2">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        <small>Review loan applications carefully</small>
-                    </div>
-                    <div class="recommendation-item mb-2">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        <small>Monitor member contribution patterns</small>
-                    </div>
-                    <div class="recommendation-item">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        <small>Engage inactive members</small>
-                    </div>
-                </div>
+                {% endif %}
             </div>
         </div>
     </div>

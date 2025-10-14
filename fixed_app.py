@@ -241,6 +241,15 @@ class CryptoWallet(db.Model):
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
+# Context processor for unread notifications and discussion count
+@app.context_processor
+def inject_counts():
+    if current_user.is_authenticated:
+        unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+        discussion_count = Discussion.query.count()
+        return dict(unread_notifications_count=unread_count, discussion_count=discussion_count)
+    return dict(unread_notifications_count=0, discussion_count=0)
+
 # Admin required decorator
 def admin_required(f):
     @wraps(f)
@@ -701,7 +710,21 @@ def activities():
 @login_required
 def notifications():
     notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.date.desc()).all()
-    return render_template('notifications/list.html', notifications=notifications)
+    discussions = Discussion.query.order_by(Discussion.date.desc()).limit(5).all()
+    
+    # Mark all notifications as read
+    Notification.query.filter_by(user_id=current_user.id, is_read=False).update({'is_read': True})
+    db.session.commit()
+    
+    return render_template('notifications/list.html', notifications=notifications, discussions=discussions)
+
+@app.route('/notifications/clear')
+@login_required
+def clear_notifications():
+    Notification.query.filter_by(user_id=current_user.id).delete()
+    db.session.commit()
+    flash('All notifications cleared successfully!', 'success')
+    return redirect(url_for('notifications'))
 
 @app.route('/account/profile')
 @login_required
@@ -1295,7 +1318,6 @@ def predict_member_default(member_id):
 
 # Create database tables and add sample data
 with app.app_context():
-    db.drop_all()
     db.create_all()
     
     if not User.query.filter_by(is_admin=True).first():

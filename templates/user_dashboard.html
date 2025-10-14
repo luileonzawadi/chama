@@ -127,77 +127,11 @@
 
         <!-- Sidebar -->
         <div class="col-12 col-lg-4">
-            <!-- Online Members -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-users me-2 text-success"></i>Members Online</h5>
-                </div>
-                <div class="card-body">
-                    {% if online_members %}
-                        {% for member in online_members[:5] %}
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="online-indicator bg-success me-2"></div>
-                            <div>
-                                <div class="fw-medium">{{ member.name }}</div>
-                                <small class="text-muted">{{ member.user.last_seen.strftime('%I:%M %p') if member.user.last_seen else 'Just now' }}</small>
-                            </div>
-                        </div>
-                        {% endfor %}
-                        {% if online_members|length > 5 %}
-                            <small class="text-muted">+{{ online_members|length - 5 }} more online</small>
-                        {% endif %}
-                    {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-user-slash fa-2x text-muted mb-2"></i>
-                            <p class="text-muted mb-0">No members online</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
 
-            <!-- Recent Discussions -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-comments me-2 text-info"></i>Recent Discussions</h5>
-                </div>
-                <div class="card-body">
-                    {% if discussions %}
-                        {% for discussion in discussions %}
-                        <div class="mb-3">
-                            <h6><a href="{{ url_for('view_discussion', discussion_id=discussion.id) }}" class="text-decoration-none">{{ discussion.title }}</a></h6>
-                            <small class="text-muted">by {{ discussion.user.username }} • {{ discussion.date.strftime('%b %d') }}</small>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-comment fa-2x text-muted mb-2"></i>
-                            <p class="text-muted mb-0">No discussions yet</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
 
-            <!-- Notifications -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-bell me-2 text-warning"></i>Notifications</h5>
-                </div>
-                <div class="card-body">
-                    {% if notifications %}
-                        {% for notification in notifications %}
-                        <div class="alert alert-info alert-sm mb-2">
-                            <h6 class="mb-1">{{ notification.title }}</h6>
-                            <small>{{ notification.message|truncate(50) }}</small>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
-                            <p class="text-muted mb-0">No new notifications</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+
+
+
         </div>
     </div>
 </div>

@@ -23,13 +23,75 @@
                 <li class="nav-item">
                     <a class="nav-link {% if request.path == url_for('discussions') %}active{% endif %}" href="{{ url_for('discussions') }}">
                         <i class="fas fa-comments me-1"></i>Discussions
+                        {% if discussion_count > 0 %}
+                            <span class="badge bg-info rounded-pill ms-1">{{ discussion_count }}</span>
+                        {% endif %}
                     </a>
                 </li>
-                {% if current_user.is_admin %}
-                <li class="nav-item">
-                    <a class="nav-link {% if request.path == url_for('admin_dashboard') %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
-                        <i class="fas fa-tachometer-alt me-1"></i>Admin
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-bars me-1"></i>Menu
                     </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('expenses') }}">
+                            <i class="fas fa-receipt me-1"></i>Expenses
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('goals') }}">
+                            <i class="fas fa-bullseye me-1"></i>Goals
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('investments') }}">
+                            <i class="fas fa-chart-pie me-1"></i>Investments
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('meetings') }}">
+                            <i class="fas fa-calendar me-1"></i>Meetings
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('activities') }}">
+                            <i class="fas fa-tasks me-1"></i>Activities
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('loans') }}">
+                            <i class="fas fa-handshake me-1"></i>Loans
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('my_contributions') }}">
+                            <i class="fas fa-money-bill-wave me-1"></i>My Contributions
+                        </a></li>
+                        {% if current_user.is_admin %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('reports') }}">
+                            <i class="fas fa-file-alt me-1"></i>Reports
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('ai_insights') }}">
+                            <i class="fas fa-brain me-1"></i>AI Insights
+                        </a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% if current_user.is_admin %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-shield-alt me-1"></i>Admin
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin_members') }}">
+                            <i class="fas fa-users me-1"></i>Manage Members
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin_loan_requests') }}">
+                            <i class="fas fa-handshake me-1"></i>Manage Loans
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('send_notification') }}">
+                            <i class="fas fa-bell me-1"></i>Send Notification
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin_ai_insights') }}">
+                            <i class="fas fa-brain me-1"></i>AI Insights
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin_risk_analysis') }}">
+                            <i class="fas fa-chart-line me-1"></i>Risk Analysis
+                        </a></li>
+                    </ul>
                 </li>
                 {% endif %}
             </ul>
@@ -41,7 +103,7 @@
                             <i class="fas fa-user-circle"></i>
                             <span class="online-dot"></span>
                         </div>
-                        <span class="ms-1">{{ current_user.username }}</span>
+                        <span class="ms-1" style="color: #007bff;">{{ current_user.username }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="{{ url_for('account_profile') }}">
@@ -52,6 +114,9 @@
                         </a></li>
                         <li><a class="dropdown-item" href="{{ url_for('notifications') }}">
                             <i class="fas fa-bell me-1"></i>Notifications
+                            {% if unread_notifications_count > 0 %}
+                                <span class="badge bg-danger rounded-pill ms-2">{{ unread_notifications_count }}</span>
+                            {% endif %}
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{{ url_for('logout') }}">
@@ -74,6 +139,8 @@
 .user-avatar {
     position: relative;
     display: inline-block;
+    color: #007bff;
+    font-size: 1.5rem;
 }
 
 .online-dot {
