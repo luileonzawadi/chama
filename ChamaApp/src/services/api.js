@@ -44,6 +44,22 @@ export const chamaAPI = {
     const response = await api.get('/activities');
     return response.data;
   },
+
+  requestLoan: async (amount, purpose) => {
+    const response = await api.post('/loans/request', {
+      amount,
+      purpose,
+    });
+    return response.data;
+  },
+
+  createDiscussion: async (title, content) => {
+    const response = await api.post('/discussions/create', {
+      title,
+      content,
+    });
+    return response.data;
+  },
 };
 
 export default api;

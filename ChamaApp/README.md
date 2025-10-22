@@ -1,136 +1,64 @@
-# Chama Mobile App - React Native
+# Chama Mobile App
 
-A complete mobile application for Chama management with M-Pesa integration.
+A React Native mobile application for managing chama (investment group) activities.
 
-## Features ✅
+## Features
 
-- 🔐 **User Authentication** - Login with username/password
-- 📊 **Dashboard** - View stats and recent activity
-- 💰 **M-Pesa Contributions** - Make payments directly from mobile
-- 🏦 **Loan Management** - View loan applications and status
-- 💬 **Community Discussions** - Read community posts
-- 📅 **Activities** - View upcoming chama events
-- 📱 **Native Mobile UI** - Optimized for mobile devices
+- **Dashboard**: View contribution stats and recent activities
+- **Contributions**: Make M-Pesa contributions to your chama
+- **Loans**: Request and track loan applications
+- **Discussions**: Participate in group discussions
+- **Activities**: View recent chama activities
 
-## Setup Instructions
+## Setup
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - React Native CLI
-- Android Studio (for Android)
-- Xcode (for iOS - Mac only)
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
 
 ### Installation
 
-1. **Install dependencies:**
+1. Install dependencies:
 ```bash
-cd ChamaApp
 npm install
 ```
 
-2. **Install iOS dependencies (Mac only):**
+2. For Android:
+```bash
+npx react-native run-android
+```
+
+3. For iOS:
 ```bash
 cd ios && pod install && cd ..
+npx react-native run-ios
 ```
 
-3. **Start Metro bundler:**
-```bash
-npm start
-```
+## API Configuration
 
-4. **Run on Android:**
-```bash
-npm run android
-```
+Update the API base URL in `src/services/api.js`:
 
-5. **Run on iOS (Mac only):**
-```bash
-npm run ios
-```
-
-## Backend Setup
-
-Make sure your Flask backend is running:
-```bash
-cd ../
-python fixed_app.py
-```
-
-The app connects to:
 - Android Emulator: `http://10.0.2.2:5000/api`
 - iOS Simulator: `http://localhost:5000/api`
+- Physical Device: `http://YOUR_COMPUTER_IP:5000/api`
 
-## Login Credentials
+## Backend Integration
 
-- **Admin:** `admin` / `admin`
-- **User:** `user` / `user`
+This app connects to the Flask backend server. Ensure the backend is running on port 5000 with the following endpoints:
 
-## App Structure
-
-```
-ChamaApp/
-├── src/
-│   ├── screens/
-│   │   ├── LoginScreen.js
-│   │   ├── DashboardScreen.js
-│   │   ├── ContributeScreen.js
-│   │   ├── LoansScreen.js
-│   │   ├── DiscussionsScreen.js
-│   │   └── ActivitiesScreen.js
-│   └── services/
-│       └── api.js
-├── App.js
-└── package.json
-```
-
-## Key Features
-
-### 🔐 Authentication
-- Secure login with backend API
-- Session management
-- Auto-redirect on success
-
-### 📊 Dashboard
-- Real-time stats display
-- Recent contributions
-- Loan status overview
-- Pull-to-refresh functionality
-
-### 💰 M-Pesa Integration
-- Direct mobile payments
-- Phone number validation
-- Payment confirmation
-- Error handling
-
-### 📱 Mobile-First Design
-- Native navigation
-- Touch-friendly interface
-- Responsive layouts
-- Material Design icons
-
-## API Endpoints Used
-
-- `POST /api/login` - Authentication
+- `POST /api/login` - User authentication
 - `GET /api/dashboard` - Dashboard data
-- `POST /api/contribute` - M-Pesa payments
-- `GET /api/loans` - Loan information
-- `GET /api/discussions` - Community posts
-- `GET /api/activities` - Upcoming events
+- `POST /api/contribute` - Make contributions
+- `GET /api/loans` - Get user loans
+- `POST /api/loans/request` - Request new loan
+- `GET /api/discussions` - Get discussions
+- `POST /api/discussions/create` - Create discussion
+- `GET /api/activities` - Get recent activities
 
-## Development Notes
+## Demo Credentials
 
-- Uses React Navigation for screen management
-- Axios for API communication
-- Material Icons for consistent UI
-- Pull-to-refresh on all data screens
-- Error handling with user-friendly alerts
-
-## Next Steps
-
-1. **Test on real devices**
-2. **Add push notifications**
-3. **Implement offline support**
-4. **Add biometric authentication**
-5. **Build and distribute app**
-
-Your Chama mobile app is ready! 🚀
+- Admin: `admin/admin`
+- User: `user/user`

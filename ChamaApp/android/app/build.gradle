@@ -1,0 +1,27 @@
+apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
+
+android {
+    namespace "com.chamaapp"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.chamaapp"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+dependencies {
+    implementation "com.facebook.react:react-android"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
+}
