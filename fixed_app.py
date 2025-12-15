@@ -930,7 +930,7 @@ def remove_member(member_id):
 @app.route('/admin/reset-password/<int:user_id>')
 @login_required
 @admin_required
-def reset_password(user_id):
+def admin_reset_password(user_id):
     user = User.query.get_or_404(user_id)
     if user.is_admin:
         flash('Cannot reset admin password!', 'danger')
@@ -969,7 +969,7 @@ def change_password():
     return render_template('account/change_password.html')
 
 @app.route('/reset-password', methods=['GET', 'POST'])
-def password_reset():
+def reset_password():
     if request.method == 'POST':
         username = request.form.get('username')
         user = User.query.filter_by(username=username).first()
